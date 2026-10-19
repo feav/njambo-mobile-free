@@ -1,0 +1,22 @@
+<ion-content>
+  <app-page-header title="Défis" [showAdd]="false"></app-page-header>
+  <main class="challenges-page">
+    <section class="challenge-title"><div class="title-mark">★</div><div><h1>DÉFIS</h1><p>Joue. Progresse. Gagne plus !</p></div></section>
+    <section class="challenge-hero"><div class="hero-copy"><h2>DÉFIS <span>DU JOUR</span></h2><p>Relève les défis et gagne des récompenses !</p><strong>{{completedCount()}} / {{visibleItems().length}} TERMINÉS</strong><div class="hero-progress"><i *ngFor="let step of heroSteps();let index=index" [class.filled]="index<completedCount()"></i></div><small>◷ &nbsp; Réinitialisation {{resetLabel()}}</small></div><div class="hero-prize"><span>♠</span><strong>{{totalReward()}} JETONS</strong><small>ENCORE À GAGNER<br>AUJOURD’HUI</small></div></section>
+    <nav class="period-tabs"><button [class.active]="activePeriod==='DAILY'" (click)="activePeriod='DAILY'">☀ <span>AUJOURD’HUI</span></button><button [class.active]="activePeriod==='WEEKLY'" (click)="activePeriod='WEEKLY'">▣ <span>SEMAINE</span></button><button [class.active]="activePeriod==='MONTHLY'" (click)="activePeriod='MONTHLY'">☆ <span>EXPLOITS</span></button></nav>
+    <p class="state" *ngIf="loading">Chargement des défis…</p>
+    <section class="challenge-list"><article class="challenge-card" *ngFor="let c of visibleItems()" [class.done]="c.claimed" [class.ready]="c.eligible&&!c.claimed"><div class="challenge-icon"><span>{{iconFor(c)}}</span></div><div class="challenge-body"><div class="challenge-heading"><h2>{{c.name}}</h2><strong>+{{c.reward}} JETONS</strong></div><p>{{c.description}}</p><div class="progress-row"><div class="progress"><i [style.width.%]="progressWidth(c)"></i></div><b>{{c.progress}} / {{c.target}}</b></div><small *ngIf="c.riskFlag" class="risk">ⓘ Jouer contre plusieurs adversaires requis.</small></div><button *ngIf="c.eligible&&!c.claimed" type="button" (click)="claim(c)">RÉCLAMER</button><b *ngIf="c.claimed" class="claimed">✓ Réclamé</b><span *ngIf="!c.eligible&&!c.claimed" class="chevron">›</span></article><div class="empty" *ngIf="!loading&&!visibleItems().length">Aucun défi actif pour cette période.</div></section>
+  </main>
+</ion-content>
+<app-bottom-nav active="menu"></app-bottom-nav>
+<div class="reward-overlay" *ngIf="rewardAnimation" role="dialog" aria-modal="true" aria-label="Récompense gagnée" (click)="closeRewardAnimation()">
+  <div class="reward-confetti" aria-hidden="true"><i *ngFor="let spark of [1,2,3,4,5,6,7,8]"></i></div>
+  <section class="reward-modal" (click)="$event.stopPropagation()">
+    <p class="reward-kicker">DÉFI RÉUSSI !</p>
+    <div class="casino-coin" aria-hidden="true"><span>F</span></div>
+    <h2>Félicitations !</h2>
+    <strong class="reward-amount">+{{rewardAmount}} JETONS</strong>
+    <p>La récompense a été ajoutée à ton solde.</p>
+    <button type="button" (click)="closeRewardAnimation()">CONTINUER</button>
+  </section>
+</div>

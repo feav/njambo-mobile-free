@@ -1,0 +1,2 @@
+import{NgModule}from'@angular/core';import{CommonModule}from'@angular/common';import{IonicModule}from'@ionic/angular';import{RouterModule}from'@angular/router';import{PlayerProfilePage}from'./player-profile.page';import{PageHeaderComponent}from'../shared/page-header/page-header.component';import{BottomNavModule}from'../bottom-nav/bottom-nav.module';
+@NgModule({declarations:[PlayerProfilePage],imports:[CommonModule,IonicModule,PageHeaderComponent,BottomNavModule,RouterModule.forChild([{path:'',component:PlayerProfilePage}])]})export class PlayerProfilePageModule{}

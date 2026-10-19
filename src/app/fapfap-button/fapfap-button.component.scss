@@ -1,0 +1,97 @@
+.test-button {
+    width: 100%;
+    height: var(--height);
+    box-sizing: border-box;
+    touch-action: manipulation;
+    display: block;
+    margin: 0 auto;
+    background: transparent;
+    transform-origin: center;
+    transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.test-button .body {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    color: #fff;
+    width: 100%;
+    height: 100%;
+    padding: 0 18px;
+    min-height: 46px;
+    border: 1px solid rgba(255, 239, 199, 0.24);
+    border-radius: 18px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent 42%),
+        linear-gradient(180deg, var(--background-tint), var(--background-shade));
+    box-shadow:
+        0 12px 26px rgba(0, 0, 0, 0.26),
+        inset 0 1px 0 rgba(255, 255, 255, 0.24);
+    overflow: hidden;
+    cursor: pointer;
+    transform: translateY(0) scale(1);
+    transition:
+        transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1),
+        box-shadow 0.16s ease,
+        filter 0.16s ease;
+}
+
+.test-button .body .label {
+    position: relative;
+    display: block;
+    font-size: 0.84rem;
+    line-height: 1 !important;
+    font-weight: 800;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #fff;
+    margin: 0;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 45%);
+    user-select: none;
+}
+
+.test-button .body::before {
+    content: "";
+    position: absolute;
+    width: calc(100% - 18px);
+    height: 44%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.06));
+    top: 6px;
+    left: 9px;
+    border-radius: 14px;
+    pointer-events: none;
+    opacity: 0.95;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .test-button:hover .body {
+        transform: translateY(-2px) scale(1.03);
+        filter: brightness(1.04) saturate(1.03);
+        box-shadow:
+            0 16px 30px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+}
+
+.test-button:active .body,
+.test-button .body:active:not([disabled]) {
+    transform: translateY(1px) scale(0.97);
+    box-shadow:
+        0 8px 16px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    animation: button-bounce 220ms ease-out;
+}
+
+.test-button .body:focus-visible {
+    outline: 2px solid rgba(244, 199, 107, 0.6);
+    outline-offset: 2px;
+}
+
+@keyframes button-bounce {
+    0% { transform: translateY(1px) scale(0.97); }
+    45% { transform: translateY(-2px) scale(1.05); }
+    100% { transform: translateY(0) scale(1); }
+}

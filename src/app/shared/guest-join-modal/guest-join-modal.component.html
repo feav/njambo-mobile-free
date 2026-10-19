@@ -1,0 +1,25 @@
+<ion-content class="guest-modal-content">
+  <div class="modal-shell">
+    <button class="modal-close" type="button" aria-label="Fermer" (click)="close()"><ion-icon name="close-outline"></ion-icon></button>
+    <div class="handle"></div>
+    <h1>Rejoindre en tant qu’invité</h1>
+    <p class="intro">Entrez votre email pour jouer tout de suite. On vous l’enverra pour que vous ne perdiez pas votre progression.</p>
+    <div class="signup-bonus" role="note">
+      <ion-icon name="gift-outline"></ion-icon>
+      <span><strong>Vérifiez votre adresse email</strong> et recevez automatiquement votre premier crédit bonus sur votre compte<span *ngIf="signupBonusAmount > 0"> : <b>{{signupBonusAmount | number:'1.0-2':'fr-FR'}} JETONS</b></span>.</span>
+    </div>
+    <form [formGroup]="form" (ngSubmit)="join()">
+      <div class="item-container">
+        <ion-item lines="none">
+          <ion-icon class="input-icon" slot="start" name="mail-outline"></ion-icon>
+          <ion-input formControlName="email" type="email" placeholder="Email" (keyup.enter)="join()"></ion-input>
+        </ion-item>
+      </div>
+      <p class="field-error" *ngIf="form.get('email')?.touched && form.get('email')?.invalid">Entrez une adresse email valide.</p>
+      <button type="submit" class="join-button">
+        <span>Rejoindre en tant qu’invité</span>
+        <ion-icon name="arrow-forward-outline"></ion-icon>
+      </button>
+    </form>
+  </div>
+</ion-content>

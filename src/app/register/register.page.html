@@ -1,0 +1,59 @@
+<ion-content scrollY="true">
+    <div class="main">
+        <div class="brand">
+            <img src="../../assets/images/njambo-logo.webp" width="960" height="640" alt="Njambo – Jeux de cartes">
+        </div>
+
+        <div class="auth-panel">
+            <div class="page-title">
+                <h1>Créer un compte</h1>
+                <p>Rejoins la communauté Njambo</p>
+            </div>
+            <form [formGroup]="registerFormGroup">
+                <div class="item-container">
+                    <ion-item lines="none">
+                        <ion-icon class="input-icon" slot="start" name="person-outline"></ion-icon>
+                        <ion-input formControlName="name" type="text" placeholder="Nom"></ion-input>
+                    </ion-item>
+                </div>
+                <div class="item-container">
+                    <ion-item lines="none">
+                        <ion-icon class="input-icon" slot="start" name="at-outline"></ion-icon>
+                        <ion-input formControlName="pseudo" type="text" placeholder="Pseudo"></ion-input>
+                    </ion-item>
+                </div>
+                <div class="item-container">
+                    <ion-item lines="none">
+                        <ion-icon class="input-icon" slot="start" name="mail-outline"></ion-icon>
+                        <ion-input formControlName="email" type="email" placeholder="Email"></ion-input>
+                    </ion-item>
+                </div>
+                <div class="item-container">
+                    <ion-item lines="none">
+                        <ion-icon class="input-icon" slot="start" name="call-outline"></ion-icon>
+                        <ion-input formControlName="telephone" type="tel" placeholder="Téléphone"></ion-input>
+                    </ion-item>
+                </div>
+                <div class="item-container">
+                    <ion-item lines="none">
+                        <ion-icon class="input-icon" slot="start" name="lock-closed-outline"></ion-icon>
+                        <ion-input formControlName="password" [type]="passwordType" placeholder="Mot de passe"></ion-input>
+                        <ion-icon
+                            class="password-icon"
+                            slot="end"
+                            [name]="passwordIconName"
+                            (click)="changePasswordType()">
+                        </ion-icon>
+                    </ion-item>
+                </div>
+            </form>
+
+            <button type="button" class="register-button" (click)="register()">
+                <span>Créer mon compte</span>
+                <ion-icon name="arrow-forward-outline"></ion-icon>
+            </button>
+
+            <div class="login">Vous avez déjà un compte ? <a [routerLink]="['/login']">Se connecter</a></div>
+        </div>
+    </div>
+</ion-content>

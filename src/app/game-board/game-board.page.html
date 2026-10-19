@@ -1,0 +1,266 @@
+<ion-content scrollY="false">
+    <div class="game-shell" [class.deal-in-progress]="isDealingCards">
+        <header class="topbar">
+            <button class="icon-button" type="button" (click)="openMenu()" aria-label="Ouvrir le menu">
+                <ion-icon name="menu-outline"></ion-icon>
+            </button>
+
+            <div class="table-meta">
+                <div class="title-line">
+                    <span class="crown">♛</span>
+                    <div>
+                        <p>{{ tableName }}</p>
+                        <small>ID partie · {{ tableCode }}</small>
+                        <small class="participants-line" *ngIf="boardPlayers.length">{{ participantNames }}</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kora-badge"><span>KORA</span><strong>♛♛♛</strong></div>
+
+            <span *ngIf="spectating" class="spectator-badge"><ion-icon name="eye-outline"></ion-icon> {{spectatorCount}}</span>
+
+            <div class="voice-controls" *ngIf="!spectating" [class.voice-on]="voiceEnabled" [class.voice-muted]="voiceMuted">
+                <button class="voice-button" type="button" (click)="toggleVoice()"
+                    [disabled]="voiceActivating"
+                    [attr.aria-label]="voiceEnabled ? 'Quitter le salon vocal' : 'Activer le salon vocal'"
+                    [title]="voiceEnabled ? 'Quitter le vocal' : 'Activer le vocal'">
+                    <ion-icon [name]="voiceEnabled ? 'headset' : 'headset-outline'"></ion-icon>
+                    <span class="voice-dot" *ngIf="voiceEnabled"></span>
+                </button>
+                <button *ngIf="voiceEnabled" class="voice-mute-button" type="button" (click)="toggleVoiceMute()"
+                    [attr.aria-label]="voiceMuted ? 'Réactiver le microphone' : 'Couper le microphone'"
+                    [title]="voiceMuted ? 'Réactiver le micro' : 'Couper le micro'">
+                    <ion-icon [name]="voiceMuted ? 'mic-off' : 'mic'"></ion-icon>
+                </button>
+            </div>
+
+            <button *ngIf="realtimeMode && gameStatus === 'IN_PROGRESS' && !spectating" class="automation-switch"
+                type="button" [class.on]="displayAutomaticMode" [disabled]="automationSubmitting"
+                [attr.aria-pressed]="displayAutomaticMode" [attr.aria-label]="displayAutomaticMode ? 'Passer en mode manuel' : 'Passer en mode automatique'"
+                (click)="toggleAutomaticMode()" [title]="displayAutomaticMode ? 'Mode automatique' : 'Mode manuel'">
+                <span class="automation-track"><i></i></span>
+                <small>{{displayAutomaticMode ? 'Auto' : 'Manuel'}}</small>
+            </button>
+
+            <button *ngIf="!spectating" class="chat-button" type="button" (click)="openChat()" aria-label="Messages">
+                <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+            </button>
+
+            <button class="settings-button" type="button" (click)="openSettings()" aria-label="Paramètres">
+                <ion-icon name="settings-outline"></ion-icon>
+            </button>
+        </header>
+        <button *ngIf="gameStatus === 'IN_PROGRESS' && !spectating && !isChampionshipDuel && !abandoningGame" class="floating-abandon-button" type="button" (click)="abandonGame()" [disabled]="abandoningGame" aria-label="Abandonner la partie" title="Abandonner la partie">
+            <ion-icon name="flag-outline"></ion-icon><span>{{ abandoningGame ? 'Abandon…' : 'Abandonner' }}</span>
+        </button>
+        <app-game-stake-info *ngIf="gameId" [gameId]="gameId"></app-game-stake-info>
+
+        <div class="game-area" [class.spectating]="spectating">
+          <div class="spectator-banner" *ngIf="spectating"><ion-icon name="eye-outline"></ion-icon> Vous regardez en spectateur</div>
+          <section class="opponent-corners">
+            <article class="opponent" *ngFor="let player of boardPlayers; let i = index"
+                [attr.data-player-id]="player.id"
+                [ngClass]="[playerPosition(i), player.isMe ? 'is-me' : 'is-opponent', hasTurn(player) ? 'has-turn' : '', isCommander(player) ? 'is-commander' : '']">
+                <div class="avatar-ring" [ngClass]="playerColor(i)" appPlayerProfile [appPlayerProfile]="{userId: player.userId, username: player.name, avatarUrl: player.avatar, countryCode: player.countryCode}">
+                    <img [src]="player.avatar" [alt]="player.name">
+                    <span class="seat-index">{{ i + 1 }}</span>
+                    <button class="voice-player-indicator" type="button" *ngIf="voiceConnected(player)"
+                        [class.muted]="(player.isMe && voiceMuted) || voiceMutedUserIds.has(player.userId)"
+                        (click)="togglePlayerVoiceMute(player, $event)"
+                        [disabled]="player.isMe"
+                        [attr.aria-label]="player.isMe ? (voiceMuted ? 'Votre micro est coupé' : 'Votre micro est actif') : (voiceMutedUserIds.has(player.userId) ? 'Écouter ' + player.name : 'Mettre ' + player.name + ' en sourdine')"
+                        [title]="player.isMe ? (voiceMuted ? 'Votre micro est coupé' : 'Votre micro est actif') : (voiceMutedUserIds.has(player.userId) ? 'Réactiver le son' : 'Mettre en sourdine')">
+                        <ion-icon [name]="player.isMe ? (voiceMuted ? 'mic-off' : 'mic') : (voiceMutedUserIds.has(player.userId) ? 'volume-mute' : 'volume-high')"></ion-icon>
+                    </button>
+                </div>
+                <div class="player-label">
+                    <div class="player-name"><b>{{player.name}}</b><em *ngIf="player.isMe">Vous</em><app-player-badges [userId]="player.userId" [countryCode]="player.countryCode" gameType="FAFAP"></app-player-badges></div>
+                    <span *ngIf="gameStatus !== 'WAITING_FOR_PLAYERS' && (player.isMe || !player.connected)">{{ player.connected ? (player.cardCount + ' carte' + (player.cardCount > 1 ? 's' : '')) : 'Reconnexion…' }}</span>
+                    <span *ngIf="gameStatus === 'WAITING_FOR_PLAYERS'" [class.player-ready]="player.ready">{{ player.ready ? 'Prêt' : 'En attente' }}</span>
+                    <div class="role-icons" *ngIf="hasTurn(player) || isCommander(player)">
+                        <span class="commander-icon" *ngIf="isCommander(player)" role="img" aria-label="Joueur dominant" title="Joueur dominant">
+                            <i class="fas fa-crown" aria-hidden="true"></i>
+                        </span>
+                        <span class="turn-icon" *ngIf="hasTurn(player)" role="img" [attr.aria-label]="player.isMe ? 'À vous de jouer' : 'Ce joueur doit jouer'" [title]="player.isMe ? 'À vous de jouer' : 'Ce joueur doit jouer'">
+                            <i class="fas fa-hand-paper" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                </div>
+                <div class="player-chat-bubble" *ngIf="chatBubbles.get(player.userId) as chatMessage">
+                    {{ chatMessage }}
+                </div>
+                <button *ngIf="!isChampionshipDuel && isGameCreator && !player.isMe && (waitlistPlayers.length > 0 || (!player.ready && readyCount > 0)) && (gameStatus === 'WAITING_FOR_PLAYERS' || gameStatus === 'READY')" type="button" class="kick-player" (click)="kickPlayer(player)" [attr.aria-label]="'Retirer ' + player.name"><ion-icon name="close"></ion-icon></button>
+                <div class="player-card-history" *ngIf="!player.isMe && pastCardsForPlayer(player.id).length"
+                    [attr.aria-label]="'Anciennes cartes jouées par ' + player.name">
+                    <span class="history-label">Cartes jouées</span>
+                    <div class="history-cards">
+                        <div class="history-card" *ngFor="let card of pastCardsForPlayer(player.id)"
+                            [title]="'Manche ' + card.roundNumber + ' · jouée en position ' + card.playOrderInRound">
+                            <img [src]="card.path_to_image" [alt]="card.name">
+                            <small>{{ card.playOrderInRound }}</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="back-cards" *ngIf="!player.isMe">
+                    <img *ngFor="let card of hiddenCards(player)" [src]="card" alt="Carte masquée">
+                </div>
+            </article>
+          </section>
+
+        <section class="table-stage">
+            <div class="table-glow"></div>
+            <div class="inner-ring"></div>
+            <div class="deal-origin" *ngIf="isDealingCards" aria-hidden="true">
+                <img src="../../assets/images/cards/green_back.png" alt="">
+                <img src="../../assets/images/cards/green_back.png" alt="">
+                <img src="../../assets/images/cards/green_back.png" alt="">
+            </div>
+            <div class="deal-flight-layer" *ngIf="isDealingCards" aria-hidden="true">
+                <img class="deal-flight-card" *ngFor="let flight of dealFlights; trackBy: trackDealFlight"
+                    src="../../assets/images/cards/green_back.png" alt=""
+                    [style.--deal-x]="flight.x + 'px'"
+                    [style.--deal-y]="flight.y + 'px'"
+                    [style.--deal-mid-x]="flight.midX + 'px'"
+                    [style.--deal-mid-y]="flight.midY + 'px'"
+                    [style.--deal-rotation]="flight.rotation + 'deg'"
+                    [style.animation-delay]="flight.delay + 'ms'">
+            </div>
+            <div class="dominant-card-callout" *ngIf="dominantVisualCard() as dominantCard"
+                aria-label="Carte dominante">
+                <div class="dominant-card-corner">
+                    <img [src]="dominantCard.path_to_image" [alt]="dominantCard.name">
+                </div>
+                <div class="dominant-card-copy">
+                    <span><span class="crown">♛</span> Dominante</span>
+                    <strong>{{ cardPlayer(dominantCard)?.name || dominantCard.name }}</strong>
+                </div>
+            </div>
+
+            <div *ngIf="!realtimeMode || gameStatus === 'IN_PROGRESS'" class="board-turn-timer"
+                [class.timer-warning]="turnProgress <= 0.5 && turnProgress >= 0.25"
+                [class.timer-danger]="turnProgress < 0.25"
+                [class.timer-urgent]="playerSecondsRemaining < 20 && playerSecondsRemaining > 0"
+                [style.--turn-progress]="turnProgress + 'turn'"
+                aria-label="Temps restant">
+                <small>SEC</small>
+                <strong>{{ playerSecondsRemaining }}</strong>
+            </div>
+
+            <div class="table-band" aria-live="polite">
+                <span>INFO</span>
+                <strong>{{ lastAction }}</strong>
+            </div>
+
+            <div class="center-cards" [class.collecting-trick]="isCollectingTrick">
+                <div class="played-card" *ngFor="let card of cardsOnTablePlayer0; let i = index; trackBy: trackCardById"
+                    [class.dominant]="card.id === dominantCardId"
+                    [class.played-by-me]="isMyCard(card)"
+                    [attr.data-played-by-player-id]="card.playedByGamePlayerId"
+                    [style.zIndex]="i + 1" [style.transform]="getCenterCardTransform(i)"
+                    (mouseenter)="selectedCard = card" (mouseleave)="selectedCard = null">
+                    <img [src]="card.path_to_image" [class.selected]="selectedCard === card"
+                        [attr.data-card-id]="card.id" alt="Carte visible">
+                    <span class="card-player-marker" [ngClass]="cardPlayerColor(card)">
+                        {{ card.name }}
+                    </span>
+                    <span *ngIf="card.id === dominantCardId" class="dominant-marker"><span class="crown">♛</span> Dominante</span>
+                </div>
+            </div>
+        </section>
+        </div>
+
+        <section class="player-zone" *ngIf="!spectating">
+            <span class="my-played-history-target" aria-hidden="true"></span>
+            <div class="my-played-history" *ngIf="myPastCards().length" aria-label="Vos cartes jouées lors des manches précédentes">
+                <span>Déjà jouées</span>
+                <div class="my-history-cards">
+                    <div class="my-history-card" *ngFor="let card of myPastCards()"
+                        [title]="'Manche ' + card.roundNumber + ' · jouée en position ' + card.playOrderInRound">
+                        <img [src]="card.path_to_image" [alt]="card.name">
+                    </div>
+                </div>
+            </div>
+            <div class="hand-cards">
+                <div class="hand-card"
+                    *ngFor="let card of cardsInHandPlayer0; let i = index; trackBy: trackCardById"
+                    [style.zIndex]="i + 1"
+                    [style.--hand-index]="i"
+                    [style.transform]="getHandCardTransform(i)"
+                    [class.selected]="selectedCard?.id === card.id"
+                    [class.playing]="isCardPending(card)"
+                    [class.premove]="isCardPremove(card)"
+                    [class.playable-card]="isMyTurn && isCardPlayable(card)"
+                    [class.blocked-card]="isMyTurn && !isCardPlayable(card)"
+                    [attr.data-card-id]="card.id"
+                    (pointerdown)="$event.preventDefault(); selectCard(card)"
+                    (keydown.enter)="selectCard(card)"
+                    (keydown.space)="$event.preventDefault(); selectCard(card)"
+                    tabindex="0"
+                    role="button"
+                    [attr.aria-pressed]="selectedCard?.id === card.id"
+                    [attr.aria-disabled]="isMyTurn && !isCardPlayable(card)"
+                    [attr.aria-label]="'Jouer la carte ' + card.name">
+                    <img [src]="card.path_to_image" [draggable]="false" [alt]="card.name">
+                    <span class="card-shine" aria-hidden="true"></span>
+                    <span class="premove-badge" *ngIf="isCardPremove(card)">PRÉ-COUP</span>
+                </div>
+            </div>
+            <app-empty-state *ngIf="realtimeMode && cardsInHandPlayer0.length === 0"
+                [compact]="true" icon="layers-outline" title="Aucune carte disponible"
+                message="Votre main sera affichée au démarrage de la partie.">
+            </app-empty-state>
+        </section>
+
+        <section *ngIf="realtimeMode && !spectating && (gameStatus === 'WAITING_FOR_PLAYERS' || gameStatus === 'READY')" class="ready-panel">
+            <div>
+                <strong>{{ isWaitlisted ? 'Vous êtes dans la file d’attente' : currentPlayerReady ? 'Vous êtes prêt' : 'Prêt à commencer ?' }}</strong>
+                <span *ngIf="!isWaitlisted">{{ readyCount }} joueur{{ readyCount > 1 ? 's' : '' }} prêt{{ readyCount > 1 ? 's' : '' }} sur {{ boardPlayers.length }}</span>
+                <span *ngIf="isWaitlisted">Position {{ waitlistPosition }} sur {{ waitlistPlayers.length }} · promotion automatique</span>
+                <small *ngIf="boardPlayers.length < 2">Un deuxième joueur doit rejoindre la partie.</small>
+                <small *ngIf="currentPlayerReady && boardPlayers.length >= 2">En attente de la validation des autres joueurs…</small>
+            </div>
+            <div class="fafap-waitlist" *ngIf="waitlistPlayers.length"><strong>File {{waitlistPlayers.length}}/4</strong><span *ngFor="let player of waitlistPlayers;let i=index"><b>{{i+1}}</b><img [src]="player.avatar" [alt]="player.name">{{player.name}}<button *ngIf="!isChampionshipDuel&&isGameCreator&&!player.isMe" type="button" class="kick-player" (click)="kickPlayer(player)"><ion-icon name="close"></ion-icon></button></span></div>
+            <div class="lobby-primary-actions">
+                <button *ngIf="!isChampionshipDuel && !isCampaignGame" class="invite-lobby" type="button" (click)="inviteFriends()"><ion-icon name="share-social-outline"></ion-icon>Inviter des amis</button>
+                <button *ngIf="!isChampionshipDuel" class="leave-lobby" type="button" [disabled]="leavingGame" (click)="quitGame()">
+                    <ion-icon name="exit-outline"></ion-icon>
+                    {{ leavingGame ? 'Sortie…' : isGameCreator ? 'Annuler la partie' : 'Quitter la partie' }}
+                </button>
+                <small *ngIf="isChampionshipDuel" class="championship-duel-notice">Duel de championnat : dès qu’un joueur se déclare prêt, son adversaire dispose de 5 minutes pour se présenter.<strong *ngIf="readyCount === 1 && championshipReadyDeadline"> Temps restant : {{ championshipCountdown }}</strong> La partie ne peut pas être quittée.</small>
+                <button *ngIf="!isWaitlisted" class="ready-action" type="button" [disabled]="currentPlayerReady || readySubmitting" (click)="confirmReady()">
+                    <ion-icon [name]="currentPlayerReady ? 'checkmark-circle' : 'hand-right-outline'"></ion-icon>
+                    {{ readySubmitting ? 'Validation…' : currentPlayerReady ? 'Prêt' : 'Je suis prêt' }}
+                </button>
+            </div>
+        </section>
+
+        <section class="post-game-participants" *ngIf="gameStatus === 'FINISHED' && postGameParticipants.length">
+            <header><small>APRÈS LA PARTIE</small><h2>Joueurs rencontrés</h2><p>Ajoutez les participants que vous souhaitez retrouver.</p></header>
+            <article *ngFor="let player of postGameParticipants">
+                <img [src]="player.avatar" [alt]="player.name">
+                <span><strong>{{player.name}}</strong><small>Joueur</small></span>
+                <button type="button" [disabled]="!canAddParticipant(player)" (click)="addParticipantFriend(player)">
+                    <ion-icon [name]="friendUserIds.has(player.userId) ? 'checkmark-circle' : outgoingFriendUserIds.has(player.userId) ? 'time-outline' : 'person-add-outline'"></ion-icon>
+                    {{friendSubmittingUserIds.has(player.userId) ? 'Envoi…' : participantFriendLabel(player)}}
+                </button>
+            </article>
+        </section>
+
+        <section class="korat-result-reveal" *ngIf="koratReveal" role="dialog" aria-modal="true" aria-label="Partie Koraté">
+            <img src="assets/images/partie-korat.png" alt="Partie Koraté">
+        </section>
+
+        <section class="victory-claim-reveal" *ngIf="claimReveal" aria-live="assertive">
+            <header><small>REVENDICATION VALIDÉE</small><h1>{{ claimReveal.reason }}</h1><p>Les mains de tous les joueurs</p></header>
+            <div class="claim-reveal-hands">
+                <article *ngFor="let hand of claimReveal.hands" [class.winner]="hand.gamePlayerId===claimReveal.winnerPlayerId">
+                    <strong>{{ hand.username }}</strong><em *ngIf="hand.gamePlayerId===claimReveal.winnerPlayerId">Gagnant</em>
+                    <div><img *ngFor="let card of hand.cards" [src]="card.path_to_image" [alt]="card.name"></div>
+                </article>
+            </div>
+            <small class="claim-reveal-delay">Résultat dans quelques secondes…</small>
+        </section>
+
+    </div>
+</ion-content>

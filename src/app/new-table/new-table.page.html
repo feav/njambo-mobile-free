@@ -1,0 +1,106 @@
+<app-page-header title="Créer une partie"></app-page-header>
+<ion-content [class.game-stage-content]="stage === 'game'">
+  <main class="new-table-shell" [class.game-stage]="stage === 'game'">
+
+    <nav class="creation-progress" aria-label="Progression de la création">
+      <span *ngFor="let item of progressStages; let i=index" [class.active]="i + 1 === progressNumber" [class.done]="i + 1 < progressNumber"><b>{{i + 1}}</b><small>{{item==='game'?'Jeu':item==='stake'?'Jetons':item==='players'?'Joueurs':'Résumé'}}</small></span>
+    </nav>
+
+    <section class="glass-panel game-picker stage-panel" *ngIf="stage === 'game'">
+      <div class="section-heading"><div><span>Étape {{stageNumber}} / {{stages.length}}</span><h2>Choisis ton jeu</h2><p>Chaque jeu possède sa propre table et ses propres réglages.</p></div><ion-icon name="game-controller"></ion-icon></div>
+      <div class="party-mode-toggle">
+        <button type="button" [class.active]="partyMode==='staked'" (click)="setPartyMode('staked')"><ion-icon name="cash-outline"></ion-icon><span>partie avec jetons</span></button>
+        <button type="button" [class.active]="partyMode==='casual'" (click)="setPartyMode('casual')"><ion-icon name="people-outline"></ion-icon><span>Partie amicale</span></button>
+      </div>
+      <p class="party-mode-hint" *ngIf="partyMode==='casual'">Gratuite, sans jetons ni impact sur le classement ELO. Limitée à 10 parties par jour. Idéale pour jouer en famille.</p>
+      <div class="game-type-grid">
+        <button type="button" *ngFor="let game of gameTypes" [ngClass]="game.type.toLowerCase()" [class.active]="selectedGameType===game.type" [class.soon]="!game.playable" [disabled]="!game.playable" (click)="selectGame(game)">
+          <span [class]="'game-art ' + game.type.toLowerCase()" aria-hidden="true">
+            <img class="game-cover" *ngIf="game.type==='FAFAP'" src="assets/images/game-types/fafap.webp" alt="">
+            <img class="game-cover" *ngIf="game.type==='PRESIDENT'" src="assets/images/game-types/tcheck.webp" alt="Président (Trou du cul)">
+            <img class="game-cover" *ngIf="game.type==='COCHON_GRATTE'" src="assets/images/game-types/cochon-gratte.webp" alt="">
+            <img class="game-cover" *ngIf="game.type==='CHECK_GAMES'" src="assets/images/game-types/check-games.webp" alt="Tcheck Game">
+            <img class="game-cover" *ngIf="game.type==='UNO'" src="assets/images/game-types/uno.webp" alt="">
+            <img class="game-cover" *ngIf="game.type==='TCHIA_DIRECT'" src="assets/images/game-types/21-direct.webp" alt="21 Direct">
+            <img class="game-cover" *ngIf="game.type==='TCHIA_IMPOT'" src="assets/images/game-types/21-impot.webp" alt="21 Impôt">
+            <img class="game-cover" *ngIf="game.type==='TCHIA_GARAME'" src="assets/images/game-types/21-garame.webp" alt="21 Garame">
+          </span>
+          <span class="game-copy"><small>Jeu de cartes</small><strong>{{game.name}}</strong><span>{{game.description}}</span><em>{{game.minPlayers}}–{{game.maxPlayers}} joueurs</em></span>
+          <span class="selection"><em *ngIf="!game.playable">Bientôt</em><ion-icon *ngIf="game.playable && selectedGameType===game.type" name="checkmark-circle"></ion-icon></span>
+        </button>
+      </div>
+    </section>
+
+    <section class="glass-panel limits stage-panel" *ngIf="stage === 'stake'">
+      <div class="section-heading"><div><span>Étape {{stageNumber}} / {{stages.length}}</span><h2>Choisis la participation · {{selectedGame?.name}}</h2><p>Définis le nombre de jetons utilisé par chaque joueur.</p></div><ion-icon name="sparkles"></ion-icon></div>
+      <div class="entry-row">
+        <label class="select-card entry-card">
+          <span>Jetons</span>
+          <div>
+            <ion-input [(ngModel)]="stake" type="number" inputmode="decimal" [min]="minimumStake" step="1"></ion-input>
+            <small class="stake-hint">Minimum : {{ minimumStake }} JETONS</small>
+          </div>
+        </label>
+        <div class="entry-summary">
+          <span>Solde minimum requis</span>
+          <strong>{{ requiredBalance | number:'1.0-2':'fr' }}</strong>
+          <small>{{selectedGameType === 'FAFAP' ? 'Selon le Kora choisi' : 'Égal au nombre choisi'}}</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="glass-panel mode-panel stage-panel" *ngIf="stage === 'kora'">
+      <div class="section-heading"><div><span>Étape {{stageNumber}} / {{stages.length}}</span><h2>Choisis le Kora</h2><p>Le Kora détermine le multiplicateur maximal de la partie FAFAP.</p></div><ion-icon name="trophy"></ion-icon></div>
+      <div class="mode-grid" *ngIf="selectedGameType === 'FAFAP'">
+        <button type="button" [class.active]="koraMode === 'simple'" (click)="setKoraMode('simple')">
+          <i class="fas fa-circle-notch" aria-hidden="true"></i>
+          <span>Simple Kora</span>
+          <strong>x2</strong>
+        </button>
+        <button type="button" [class.active]="koraMode === 'double'" (click)="setKoraMode('double')">
+          <i class="fas fa-crown" aria-hidden="true"></i>
+          <span>Double Kora</span>
+          <strong>x4</strong>
+        </button>
+        <button type="button" [class.active]="koraMode === 'triple'" (click)="setKoraMode('triple')">
+          <i class="fas fa-gem" aria-hidden="true"></i>
+          <span>Triple Kora <em>Recommandé</em></span>
+          <strong>x8</strong>
+        </button>
+      </div>
+    </section>
+
+    <section class="stage-panel final-stage" *ngIf="stage === 'players'">
+     <section class="glass-panel players-panel">
+      <div class="section-heading"><div><span>Étape {{stageNumber}} / {{stages.length}}</span><h2>Choisis le nombre de joueurs</h2><p>{{selectedGame?.name}} accepte de {{selectedGame?.minPlayers}} à {{selectedGame?.maxPlayers}} joueurs.</p></div><ion-icon name="people"></ion-icon></div>
+      <div class="player-count" role="group" aria-label="Nombre de joueurs">
+        <button type="button" *ngFor="let count of playerCounts" [class.active]="number_of_players === count" (click)="number_of_players = count">
+          <strong>{{ count }}</strong><span>joueurs</span>
+        </button>
+      </div>
+     </section>
+
+     <section class="glass-panel privacy-panel">
+      <div class="section-title"><h2>Accès à la partie</h2><ion-icon name="lock-closed"></ion-icon></div>
+      <div class="privacy-grid">
+        <button type="button" [class.active]="accessType === 'PUBLIC'" (click)="accessType = 'PUBLIC'; privatePassword = ''"><ion-icon name="globe-outline"></ion-icon><strong>Publique</strong><span>Visible et accessible à tous</span></button>
+        <button type="button" [class.active]="accessType === 'PRIVATE'" (click)="accessType = 'PRIVATE'"><ion-icon name="lock-closed-outline"></ion-icon><strong>Privée</strong><span>Mot de passe requis · Sur invitation</span></button>
+      </div>
+      <label class="private-password" *ngIf="accessType === 'PRIVATE'"><span>Mot de passe de la partie</span><ion-input [(ngModel)]="privatePassword" type="password" minlength="4" maxlength="72" placeholder="4 caractères minimum"></ion-input></label>
+     </section>
+
+     <section class="glass-panel invite-panel">
+      <div class="section-title"><h2>Inviter des amis</h2><ion-icon name="paper-plane-outline"></ion-icon></div>
+      <p>Ils recevront une notification pour rejoindre la table ou sa liste d’attente.</p>
+      <div class="invite-friends" *ngIf="friends.length; else noFriends">
+        <button type="button" *ngFor="let friend of friends" [class.active]="selectedFriendIds.has(friend.userId)" (click)="toggleFriend(friend.userId)">
+          <img [src]="friend.avatarUrl" [alt]="friend.username"><span><strong>{{friend.username}}</strong><small>{{friend.rating}} ELO</small></span><ion-icon [name]="selectedFriendIds.has(friend.userId)?'checkmark-circle':'add-circle-outline'"></ion-icon>
+        </button>
+      </div>
+      <ng-template #noFriends><p class="no-friends">Ajoute d’abord des joueurs humains depuis le classement.</p></ng-template>
+     </section>
+    </section>
+
+    <footer class="footer-actions" *ngIf="stage !== 'game'"><button type="button" class="secondary" (click)="previousStage()">Précédent</button><button *ngIf="!isLastStage" type="button" class="primary" (click)="nextStage()">Continuer <ion-icon name="arrow-forward"></ion-icon></button><button *ngIf="isLastStage" type="button" class="primary" [disabled]="creating" (click)="create()">{{ creating ? 'Création…' : 'Créer la partie' }} <ion-icon name="arrow-forward"></ion-icon></button></footer>
+  </main>
+</ion-content>

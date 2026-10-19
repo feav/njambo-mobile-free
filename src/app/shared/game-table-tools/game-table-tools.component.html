@@ -1,0 +1,28 @@
+<div class="table-tools">
+  <div class="turn-gauge" *ngIf="status==='IN_PROGRESS'" [ngClass]="gaugeClass" [class.mine]="myTurn" [style.--turn-progress]="progress+'%'"><div><span [style.width.%]="progress"></span></div><b>{{seconds}}s</b></div>
+  <button *ngIf="soundBroken" class="sound-retry" (click)="fixSound()" [disabled]="soundFixing" aria-label="Activer le son" title="Activer le son"><ion-icon [name]="soundFixing?'sync-outline':'volume-high-outline'"></ion-icon><span>Activer le son</span></button>
+  <button (click)="headsetClick()" [class.on]="voiceEnabled" [disabled]="voiceLoading" title="Salon vocal"><ion-icon [name]="voiceEnabled?'headset':'headset-outline'"></ion-icon></button>
+  <button *ngIf="voiceEnabled" (click)="toggleMicrophone()" [class.off]="voiceMuted" title="Microphone"><ion-icon [name]="voiceMuted?'mic-off':'mic'"></ion-icon></button>
+  <button (click)="openChat()" title="Écrire un message"><ion-icon name="chatbubble-ellipses-outline"></ion-icon></button>
+</div>
+<button *ngIf="status==='IN_PROGRESS'&&!isChampionshipDuel&&!campaignGame&&!abandoned" class="floating-abandon-button" type="button" (click)="abandonGame()" [disabled]="abandonBusy" title="Abandonner la partie"><ion-icon name="flag-outline"></ion-icon><span>{{abandonBusy?'Abandon…':'Abandonner'}}</span></button>
+<div class="voice-list" *ngIf="voiceEnabled&&connected.size"><button *ngFor="let player of players" [hidden]="!connected.has(player.userId)||player.gamePlayerId===meGamePlayerId" (click)="mute(player)" [class.muted]="mutedUsers.has(player.userId)"><ion-icon [name]="mutedUsers.has(player.userId)?'volume-mute':'volume-high'"></ion-icon>{{player.username}}</button></div>
+<div class="table-chat-bubbles"><div *ngFor="let bubble of bubbles"><b>{{bubble.username}}</b><span>{{bubble.message}}</span></div></div>
+<section class="shared-game-lobby" *ngIf="lobbyVisible">
+  <div class="lobby-heading"><small>TABLE EN ATTENTE</small><h1>{{meWaitlisted?'Vous êtes dans la file d’attente':'Prêts à jouer ?'}}</h1><p *ngIf="!meWaitlisted">{{readyCount}} joueur{{readyCount>1?'s':''}} prêt{{readyCount>1?'s':''}} sur {{seatedPlayers.length}}</p><p *ngIf="meWaitlisted">Position {{myWaitlistPosition}} sur {{waitingPlayers.length}} · promotion automatique dès qu’une place se libère</p></div>
+  <div class="lobby-players">
+    <article *ngFor="let player of seatedPlayers" [class.ready]="player.status==='READY'||player.status==='ACTIVE'">
+      <img appPlayerProfile [appPlayerProfile]="{userId: player.userId, username: player.username, avatarUrl: player.avatarUrl, countryCode: country(player)}" [src]="player.avatarUrl" [alt]="player.username"><strong>{{player.username}}</strong><app-player-badges [userId]="player.userId" [countryCode]="country(player)" [gameType]="gameType"></app-player-badges><span>{{player.status==='READY'||player.status==='ACTIVE'?'Prêt':'En attente'}}</span>
+      <button class="kick-player" *ngIf="!isChampionshipDuel&&isCreator&&player.gamePlayerId!==meGamePlayerId" type="button" (click)="kick(player)" [disabled]="!!kickingId" [attr.aria-label]="'Retirer '+player.username"><ion-icon name="close"></ion-icon></button>
+    </article>
+  </div>
+  <div class="waitlist" *ngIf="waitingPlayers.length"><strong>File d’attente · {{waitingPlayers.length}}/4</strong><span *ngFor="let player of waitingPlayers;let i=index"><b>{{i+1}}</b><img appPlayerProfile [appPlayerProfile]="{userId: player.userId, username: player.username, avatarUrl: player.avatarUrl, countryCode: country(player)}" [src]="player.avatarUrl" [alt]="player.username">{{player.username}}<button class="kick-player" *ngIf="!isChampionshipDuel&&isCreator&&player.gamePlayerId!==meGamePlayerId" type="button" (click)="kick(player)" [disabled]="!!kickingId" [attr.aria-label]="'Retirer '+player.username"><ion-icon name="close"></ion-icon></button></span></div>
+  <small class="lobby-help" *ngIf="seatedPlayers.length<2">Un autre joueur doit rejoindre la table.</small>
+  <small class="lobby-help" *ngIf="isChampionshipDuel">Duel de championnat : dès qu’un joueur se déclare prêt, son adversaire dispose de 5 minutes pour se présenter.<strong *ngIf="readyCount===1&&championshipReadyDeadline"> Temps restant : {{championshipCountdown}}</strong></small>
+  <div class="lobby-main-actions">
+    <button *ngIf="!isChampionshipDuel && !campaignGame" class="share-button" type="button" (click)="inviteFriends()" [disabled]="shareBusy"><ion-icon name="share-social-outline"></ion-icon>{{shareBusy?'Ouverture…':'Inviter des amis'}}</button>
+    <button *ngIf="!isChampionshipDuel" class="leave-button" type="button" (click)="leaveLobby()" [disabled]="lobbyLeaving"><ion-icon name="exit-outline"></ion-icon>{{lobbyLeaving?'Sortie…':isCreator?'Annuler la partie':'Quitter la partie'}}</button>
+    <button *ngIf="!meWaitlisted" class="ready-button" type="button" (click)="ready()" [disabled]="meReady||lobbyBusy"><ion-icon [name]="meReady?'checkmark-circle':'hand-right-outline'"></ion-icon>{{lobbyBusy?'Validation…':meReady?'Vous êtes prêt':'Je suis prêt'}}</button>
+  </div>
+  <div *ngIf="meWaitlisted" class="waitlist-notice"><ion-icon name="hourglass-outline"></ion-icon><span>Restez dans la salle : vous pourrez écouter, parler et serez prévenu lors de votre promotion.</span></div>
+</section>

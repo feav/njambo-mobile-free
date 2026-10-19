@@ -1,0 +1,60 @@
+<ion-content>
+  <main class="board">
+    <header><button routerLink="/search" aria-label="Retour aux parties">‹</button><div><small>COCHON GRATTÉ <i class="socket-dot" [class.online]="socketConnected"></i></small><strong>Manche {{state?.round||0}}</strong></div><span *ngIf="spectating" class="spectator-badge"><ion-icon name="eye-outline"></ion-icon> {{spectatorCount}}</span><button *ngIf="!spectating" routerLink="/rules">?</button></header>
+    <div class="spectator-banner" *ngIf="spectating"><ion-icon name="eye-outline"></ion-icon> Vous regardez en spectateur</div>
+    <div class="table" [class.transfer-active]="state?.phase==='TRANSFERRING'">
+      <div class="deck"><span>🐷</span><small>{{state?.phase==='TRANSFERRING'?'TRANSMISSION !':state?.phase==='FINAL_REVEAL'?'RÉVÉLATION':'5 CARTES'}}</small></div>
+
+      <article class="player" *ngFor="let p of opponents;let i=index;trackBy:trackPlayer" [ngStyle]="playerStyle(i,opponents.length)" [class.current]="state?.phase==='SELECTING'&&state?.currentPlayerId===p.gamePlayerId">
+        <div class="avatar-ring" appPlayerProfile [appPlayerProfile]="{userId: p.userId, username: p.username, avatarUrl: p.avatarUrl, countryCode: p.countryCode}"><img [src]="p.avatarUrl" [alt]="'Avatar de '+p.username"><span class="turn-hand" *ngIf="state?.phase==='SELECTING'&&state?.currentPlayerId===p.gamePlayerId"><i class="fas fa-hand-paper"></i></span></div>
+        <div class="player-name"><b>{{p.username}}</b><app-player-badges [userId]="p.userId" [countryCode]="p.countryCode"></app-player-badges><small>{{p.cardCount}} cartes</small></div><em [class.done]="p.selected">{{p.selected?'Carte donnée':(state?.currentPlayerId===p.gamePlayerId?'Choisit…':'Attend')}}</em><div class="opponent-hand" [attr.aria-label]="p.cardCount+' cartes dans la main de '+p.username"><img *ngFor="let ignored of visibleBacks(p);let cardIndex=index" [src]="backImage" [style.transform]="'translateX('+(cardIndex*8)+'px) rotate('+(cardIndex*4-6)+'deg)'" [style.--back-index]="cardIndex" alt="Dos de carte"><span *ngIf="extraCards(p)>0">+{{extraCards(p)}}</span></div>
+      </article>
+
+      <article class="player me-seat" [class.current]="isMyTurn" *ngIf="me">
+        <div class="avatar-ring" appPlayerProfile [appPlayerProfile]="{userId: me?.userId || '', username: me?.username, avatarUrl: me?.avatarUrl, countryCode: me?.countryCode}"><img [src]="me?.avatarUrl" [alt]="'Votre avatar'"><span class="turn-hand" *ngIf="isMyTurn"><i class="fas fa-hand-paper"></i></span></div>
+        <div class="player-name"><b>{{me?.username}}</b><app-player-badges [userId]="me?.userId" [countryCode]="me?.countryCode"></app-player-badges><small>{{me?.cardCount}} cartes</small></div><em [class.done]="me?.selected">{{me?.selected?'Carte donnée':(isMyTurn?'À vous':'Attendez')}}</em>
+      </article>
+
+      <div class="exchange-card" *ngFor="let choice of state?.tableChoices;trackBy:trackChoice" [ngStyle]="exchangeStyle(choice)" [class.transferring]="state?.phase==='TRANSFERRING'">
+        <span>🐷</span><i></i>
+      </div>
+      <div class="ceremony-ring" *ngIf="state?.phase==='CARDS_CENTER'||state?.phase==='TRANSFERRING'"></div>
+    </div>
+
+    <section class="status" [class.ceremony]="state?.phase!=='SELECTING'"><strong>{{ceremonyLabel}}</strong><button type="button" class="mode-switch" [class.enabled]="displayAutomaticMode" [attr.aria-pressed]="displayAutomaticMode" [attr.aria-label]="displayAutomaticMode?'Passer en mode manuel':'Passer en mode automatique'" (click)="automation()" *ngIf="state?.phase==='SELECTING'&&!spectating"><span>{{displayAutomaticMode?'Auto':'Manuel'}}</span><i aria-hidden="true"></i></button></section>
+    <section class="hand-zone" [attr.data-round]="state?.round" aria-label="Votre main">
+      <div class="hand-cards">
+        <button class="hand-card" *ngFor="let card of visibleHand;let i=index;trackBy:trackCard"
+          [class.playable-card]="isMyTurn&&!card.locked&&!me?.selected&&state?.phase==='SELECTING'" [class.received-locked]="card.locked"
+          [style.zIndex]="i+1" [style.--hand-index]="i"
+          [style.transform]="handCardTransform(i,visibleHand.length)"
+          [disabled]="card.locked||busy||!isMyTurn||me?.selected||state?.phase!=='SELECTING'" (click)="select(card)"
+          [attr.aria-label]="card.locked?'Carte reçue, indisponible pendant ce tour':'Donner la carte '+card.rank">
+          <img class="card-face-image" [src]="cardImage(card)" [alt]="'Carte '+card.rank">
+          <span class="received-label" *ngIf="card.locked">REÇUE</span>
+          <span class="card-shine" aria-hidden="true"></span>
+        </button>
+      </div>
+    </section>
+
+    <section class="final-reveal" *ngIf="state?.phase==='FINAL_REVEAL'">
+      <div class="reveal-title">
+        <small>FIN DE PARTIE</small><h2>Les mains sont révélées</h2><span>Résultats dans {{revealSeconds}} s</span>
+        <div class="reveal-actions" aria-label="Actions de fin de partie">
+          <button type="button" class="games" (click)="goToGames()">Parties</button>
+          <button type="button" class="rematch" [disabled]="busy" (click)="rematch()">{{busy?'Ouverture…':'Rejouer'}}</button>
+        </div>
+      </div>
+      <div class="revealed-hands">
+        <article *ngFor="let player of state?.players;trackBy:trackPlayer" [class.winner]="isWinner(player.gamePlayerId)">
+          <div class="reveal-player"><img [src]="player.avatarUrl"><strong>{{player.username}}</strong><b *ngIf="isWinner(player.gamePlayerId)">CARRÉ !</b></div>
+          <div class="reveal-cards"><span *ngFor="let card of revealedFor(player.gamePlayerId);trackBy:trackCard"><img [src]="cardImage(card)" [alt]="'Carte '+card.rank"></span></div>
+        </article>
+      </div>
+    </section>
+
+    <p class="error" *ngIf="message">{{message}}</p>
+    <app-game-table-tools *ngIf="state" [gameId]="id" [players]="state.players" [currentPlayerId]="state.currentPlayerId" [meGamePlayerId]="state.myPlayerId" [deadline]="state.deadline" [status]="state.status" [lobbyEnabled]="true"></app-game-table-tools>
+    <app-game-stake-info *ngIf="state" [gameId]="id"></app-game-stake-info>
+  </main>
+</ion-content>

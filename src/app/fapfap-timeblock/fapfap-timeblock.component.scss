@@ -1,0 +1,69 @@
+.container {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    height: 24px;
+    width: 98px;
+    border-radius: 999px;
+    background: rgba(7, 16, 12, 0.72);
+    border: 1px solid rgba(244, 199, 107, 0.18);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+
+    .left-partial,
+    .bottom-partial,
+    .right-partial {
+        width: 18px;
+        height: 18px;
+        margin: 0;
+        background: var(--filling-color);
+        opacity: 0.95;
+        border-radius: 999px;
+        flex: 0 0 auto;
+    }
+
+    .left-partial {
+        margin-left: 4px;
+    }
+
+    .right-partial {
+        margin-right: 4px;
+    }
+
+    .bottom-partial {
+        display: none;
+    }
+
+    .main {
+        position: relative;
+        width: calc(100% - 36px);
+        height: 16px;
+        margin: 0 4px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+
+        .filling {
+            height: 100%;
+            width: var(--filling-level);
+            border-radius: inherit;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.12), var(--filling-color));
+        }
+
+        .timeleft {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            margin-top: 0;
+
+            .time {
+                font-family: var(--ion-font-family);
+                font-size: 0.62rem;
+                font-weight: 800;
+                letter-spacing: 0.12em;
+                color: #fff;
+            }
+        }
+    }
+}

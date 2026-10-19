@@ -1,0 +1,5 @@
+.guild-rewards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.guild-rewards article{padding:15px;border:1px solid #80691c;border-radius:18px;display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:10px;background:linear-gradient(145deg,#1d1806,#071009)}
+.guild-rewards article>ion-icon{font-size:1.6rem;color:#f4c72f}.guild-rewards article div{display:grid;gap:3px}.guild-rewards small{color:#79ff32;font-size:.52rem}.guild-rewards strong{font-size:.76rem}.guild-rewards span{color:#a9b6aa;font-size:.62rem}.guild-rewards article>b{color:#f4c72f}
+.guild-rewards>p{grid-column:1/-1;margin:0;padding:10px 12px;border:1px solid #214d25;border-radius:12px;color:#abc0ae;font-size:.65rem}.guild-rewards>p ion-icon{margin-right:6px;vertical-align:middle;color:#79ff32}
+@media(max-width:600px){.guild-rewards{grid-template-columns:1fr}.guild-rewards>p{grid-column:auto}}

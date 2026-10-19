@@ -1,0 +1,117 @@
+<app-page-header title="Campagne" [showAdd]="false"></app-page-header>
+<ion-content class="campaign-content">
+  <main class="campaign-shell">
+    <section class="hero-panel" *ngIf="state">
+      <div class="hero-copy">
+        <span class="eyebrow"><ion-icon name="map"></ion-icon> Mode solo</span>
+        <h1>Ta progression</h1>
+        <p>Relève les défis proposés et conquiers chaque univers.</p>
+      </div>
+      <div class="hero-stats">
+        <div class="xp-global"><strong>{{experience?.totalXp||0}} XP</strong><span>Expérience globale</span></div>
+        <div><strong>{{state.completedLevelsCount}} / {{state.levels.length}}</strong><span>Niveaux</span></div>
+        <div [class.gold]="state.goldThemeUnlocked"><ion-icon name="color-palette"></ion-icon><span>{{state.goldThemeUnlocked?'Thème Or débloqué':'Thème Or au niveau 20'}}</span></div>
+      </div>
+    </section>
+
+    <button class="resume-banner" *ngIf="state?.inProgressGameId" (click)="resumeInProgress()">
+      <ion-icon name="play-circle"></ion-icon>
+      <span>Reprendre le niveau en cours</span>
+      <ion-icon name="arrow-forward"></ion-icon>
+    </button>
+
+    <div class="loading" *ngIf="loading"><ion-spinner name="crescent"></ion-spinner><span>Chargement de la campagne…</span></div>
+
+    <nav class="game-paths" *ngIf="worlds.length">
+      <button *ngFor="let world of worlds;let index=index" [class.active]="index===selectedWorldIndex" (click)="selectWorld(index)"><span>{{world.name}}</span><small>{{gameXp(world.levels[0]?.gameType)}} XP</small></button>
+    </nav>
+
+    <section class="world" *ngIf="selectedWorld as world">
+      <header class="world-heading">
+        <div><span>20 étapes · parcours indépendant</span><h2>{{world.name}}</h2></div>
+        <div class="world-progress"><strong>{{completedCount(world)}}</strong><small>/ 20</small></div>
+      </header>
+
+      <div class="adventure-map" [style.height.px]="mapHeight(world.levels.length)">
+        <div class="season-blocks" aria-hidden="true">
+          <div class="season-block season-winter"></div>
+          <div class="season-block season-autumn"></div>
+          <div class="season-block season-spring"></div>
+          <div class="season-block season-tropical"></div>
+        </div>
+        <svg class="campaign-landscape scenery-overlay" viewBox="0 0 400 2390" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="campaign-ground" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#dceaf0"/><stop offset=".2" stop-color="#a8c5a1"/><stop offset=".42" stop-color="#b78347"/><stop offset=".64" stop-color="#83ad52"/><stop offset=".82" stop-color="#4f9c51"/><stop offset="1" stop-color="#176842"/></linearGradient>
+            <linearGradient id="campaign-river" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#168baa"/><stop offset=".5" stop-color="#62d4cf"/><stop offset="1" stop-color="#087696"/></linearGradient>
+            <filter id="terrain-shadow"><feDropShadow dx="0" dy="7" stdDeviation="5" flood-opacity=".34"/></filter>
+            <symbol id="real-palm" viewBox="0 0 250 250"><image href="assets/images/campaign/environment-sprites-v1.png" width="1254" height="1254"/></symbol>
+            <symbol id="real-leafy" viewBox="0 0 250 250"><image href="assets/images/campaign/environment-sprites-v1.png" x="-250" width="1254" height="1254"/></symbol>
+            <symbol id="real-mountain" viewBox="0 0 250 250"><image href="assets/images/campaign/environment-sprites-v1.png" x="-500" width="1254" height="1254"/></symbol>
+            <symbol id="real-autumn" viewBox="0 0 250 250"><image href="assets/images/campaign/environment-sprites-v1.png" x="-750" width="1254" height="1254"/></symbol>
+            <symbol id="real-pine" viewBox="0 0 250 250"><image href="assets/images/campaign/environment-sprites-v1.png" x="-1000" width="1254" height="1254"/></symbol>
+            <symbol id="real-rocks" viewBox="0 0 250 250"><image href="assets/images/campaign/environment-sprites-v1.png" x="-250" y="-250" width="1254" height="1254"/></symbol>
+            <symbol id="real-waterfall" viewBox="0 0 250 250"><image href="assets/images/campaign/environment-sprites-v1.png" x="-500" y="-250" width="1254" height="1254"/></symbol>
+            <symbol id="real-bridge" viewBox="0 0 250 250"><image href="assets/images/campaign/environment-sprites-v1.png" x="-750" y="-250" width="1254" height="1254"/></symbol>
+            <symbol id="real-river" viewBox="0 0 250 250"><image href="assets/images/campaign/environment-sprites-v1.png" x="-500" y="-500" width="1254" height="1254"/></symbol>
+            <symbol id="real-stones" viewBox="0 0 250 250"><image href="assets/images/campaign/environment-sprites-v1.png" x="-750" y="-500" width="1254" height="1254"/></symbol>
+            <symbol id="real-red-tree" viewBox="0 0 250 250"><image href="assets/images/campaign/environment-sprites-v1.png" x="-1000" y="-250" width="1254" height="1254"/></symbol>
+            <symbol id="real-banana" viewBox="0 0 250 250"><image href="assets/images/campaign/environment-sprites-v1.png" y="-500" width="1254" height="1254"/></symbol>
+            <symbol id="real-falls" viewBox="0 0 250 250"><image href="assets/images/campaign/environment-sprites-v1.png" y="-750" width="1254" height="1254"/></symbol>
+            <symbol id="real-flower-bush" viewBox="0 0 250 250"><image href="assets/images/campaign/environment-sprites-v1.png" x="-250" y="-750" width="1254" height="1254"/></symbol>
+            <symbol id="real-mountain-green" viewBox="0 0 250 250"><image href="assets/images/campaign/environment-sprites-v1.png" x="-750" y="-750" width="1254" height="1254"/></symbol>
+            <symbol id="real-orange-tree" viewBox="0 0 250 250"><image href="assets/images/campaign/environment-sprites-v1.png" x="-1000" y="-750" width="1254" height="1254"/></symbol>
+            <symbol id="real-boulder" viewBox="0 0 250 250"><image href="assets/images/campaign/environment-sprites-v1.png" y="-1000" width="1254" height="1254"/></symbol>
+            <symbol id="real-grass" viewBox="0 0 250 250"><image href="assets/images/campaign/environment-sprites-v1.png" x="-250" y="-1000" width="1254" height="1254"/></symbol>
+            <symbol id="real-shore" viewBox="0 0 250 250"><image href="assets/images/campaign/environment-sprites-v1.png" x="-500" y="-1000" width="1254" height="1254"/></symbol>
+            <symbol id="real-pebbles" viewBox="0 0 250 250"><image href="assets/images/campaign/environment-sprites-v1.png" x="-750" y="-1000" width="1254" height="1254"/></symbol>
+            <symbol id="real-white-bush" viewBox="0 0 250 250"><image href="assets/images/campaign/environment-sprites-v1.png" x="-1000" y="-1000" width="1254" height="1254"/></symbol>
+          </defs>
+          <rect width="400" height="2390" fill="url(#campaign-ground)"/>
+          <path d="M0 430C80 385 120 470 205 425s125-7 195-45V720H0z" fill="#789c67" opacity=".5"/>
+          <path d="M0 930c80-72 145 42 230-20s115-16 170-60v510H0z" fill="#9a6d3d" opacity=".48"/>
+          <path d="M0 1470c88-55 138 45 220-13s130-30 180-8v430H0z" fill="#74a64e" opacity=".55"/>
+          <path d="M0 1940c95-60 170 34 248-10s112-20 152-5v465H0z" fill="#176b43" opacity=".6"/>
+          <path d="M-20 1830C110 1770 303 1875 421 1770M-20 1885C105 1825 285 1925 420 1835M-20 2180C105 2115 286 2220 420 2140" fill="none" stroke="url(#campaign-river)" stroke-width="48" opacity=".92"/>
+          <path d="M-20 1830C110 1770 303 1875 421 1770M-20 2180C105 2115 286 2220 420 2140" fill="none" stroke="#b9fff0" stroke-width="4" opacity=".55"/>
+          <g class="real-scenery" filter="url(#terrain-shadow)">
+            <use href="#real-mountain" x="-24" y="15" width="176" height="176"/><use href="#real-mountain" x="258" y="28" width="172" height="172"/><use href="#real-pine" x="4" y="180" width="92" height="92"/><use href="#real-pine" x="306" y="205" width="96" height="96"/><use href="#real-rocks" x="-12" y="330" width="110" height="110"/><use href="#real-pine" x="318" y="365" width="88" height="88"/>
+            <use href="#real-autumn" x="-5" y="535" width="112" height="112"/><use href="#real-autumn" x="300" y="590" width="118" height="118"/><use href="#real-rocks" x="8" y="720" width="95" height="95"/><use href="#real-waterfall" x="292" y="755" width="124" height="124"/><use href="#real-autumn" x="-16" y="890" width="128" height="128"/><use href="#real-stones" x="315" y="945" width="94" height="94"/>
+            <use href="#real-leafy" x="-8" y="1130" width="108" height="108"/><use href="#real-leafy" x="302" y="1085" width="116" height="116"/><use href="#real-rocks" x="12" y="1285" width="88" height="88"/><use href="#real-leafy" x="310" y="1305" width="102" height="102"/><use href="#real-waterfall" x="-20" y="1460" width="132" height="132"/><use href="#real-bridge" x="278" y="1515" width="132" height="132"/>
+            <use href="#real-palm" x="-18" y="1690" width="118" height="118"/><use href="#real-river" x="280" y="1700" width="142" height="142"/><use href="#real-leafy" x="4" y="1870" width="102" height="102"/><use href="#real-palm" x="302" y="1900" width="120" height="120"/><use href="#real-bridge" x="140" y="2030" width="120" height="120"/><use href="#real-rocks" x="-12" y="2070" width="105" height="105"/>
+            <use href="#real-palm" x="-22" y="2220" width="132" height="132"/><use href="#real-leafy" x="292" y="2185" width="126" height="126"/><use href="#real-stones" x="275" y="2300" width="105" height="105"/>
+            <use href="#real-mountain" x="105" y="-18" width="190" height="190"/><use href="#real-rocks" x="18" y="105" width="82" height="82"/><use href="#real-pine" x="94" y="245" width="76" height="76"/><use href="#real-pine" x="238" y="300" width="80" height="80"/><use href="#real-boulder" x="300" y="465" width="104" height="104"/>
+            <use href="#real-orange-tree" x="88" y="485" width="100" height="100"/><use href="#real-red-tree" x="225" y="680" width="104" height="104"/><use href="#real-autumn" x="85" y="810" width="92" height="92"/><use href="#real-pebbles" x="225" y="905" width="76" height="76"/><use href="#real-orange-tree" x="295" y="1010" width="98" height="98"/>
+            <use href="#real-flower-bush" x="82" y="1035" width="86" height="86"/><use href="#real-mountain-green" x="-18" y="1210" width="126" height="126"/><use href="#real-white-bush" x="235" y="1190" width="86" height="86"/><use href="#real-grass" x="92" y="1370" width="72" height="72"/><use href="#real-boulder" x="292" y="1420" width="98" height="98"/>
+            <use href="#real-falls" x="82" y="1570" width="112" height="112"/><use href="#real-flower-bush" x="230" y="1630" width="82" height="82"/><use href="#real-banana" x="12" y="1800" width="96" height="96"/><use href="#real-shore" x="245" y="1815" width="118" height="118"/><use href="#real-white-bush" x="95" y="1940" width="76" height="76"/>
+            <use href="#real-banana" x="292" y="2055" width="102" height="102"/><use href="#real-grass" x="30" y="2160" width="70" height="70"/><use href="#real-shore" x="120" y="2245" width="118" height="118"/><use href="#real-palm" x="230" y="2250" width="100" height="100"/>
+          </g>
+        </svg>
+        <div class="map-glow glow-one"></div><div class="map-glow glow-two"></div>
+        <button #levelNode class="map-level" *ngFor="let level of world.levels; let levelIndex=index"
+                [style.left.%]="nodeX(levelIndex)" [style.top.px]="nodeY(levelIndex)"
+                [class.locked]="!level.unlocked" [class.completed]="level.completed"
+                [class.current]="isCurrent(level,world)" [class.milestone]="isMilestone(levelIndex)"
+                [attr.aria-label]="'Niveau '+(levelIndex+1)+' : '+level.tierName" (click)="play(level)">
+          <span class="current-flag" *ngIf="isCurrent(level,world)">Jouer</span>
+          <span class="level-medallion">
+            <img *ngIf="badgeUrl(level) as url" [src]="url" [alt]="level.tierName">
+            <ion-icon *ngIf="!badgeUrl(level)" [name]="!level.unlocked?'lock-closed':isMilestone(levelIndex)?'trophy':gameIcon(level.gameType)"></ion-icon>
+            <b>{{levelIndex+1}}</b>
+          </span>
+          <span class="level-caption">
+            <strong>{{isMilestone(levelIndex)?'Défi spécial':level.tierName}}</strong>
+            <small *ngIf="level.unlocked">{{level.educationalBotCount}} bot{{level.educationalBotCount>1?'s':''}} · {{difficultyLabel(level)}}</small>
+          </span>
+          <span class="stars" *ngIf="level.completed" [attr.aria-label]="level.stars+' étoiles obtenues'">
+            <ion-icon name="star" *ngFor="let ignored of starSlots(level)"></ion-icon>
+          </span>
+        </button>
+      </div>
+
+      <aside class="map-legend">
+        <span><i class="done"></i>Terminé</span><span><i class="now"></i>À jouer</span><span><i class="later"></i>Verrouillé</span>
+      </aside>
+    </section>
+  </main>
+</ion-content>
+<app-bottom-nav active="home"></app-bottom-nav>

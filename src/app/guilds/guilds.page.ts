@@ -1,0 +1,22 @@
+import{Component,OnInit}from'@angular/core';import{AlertController,LoadingController}from'@ionic/angular';import{firstValueFrom}from'rxjs';import{GuildApiService,GuildView,GuildMember,GuildRewards}from'../core/guild-api.service';
+@Component({standalone:false,selector:'app-guilds',templateUrl:'./guilds.page.html',styleUrls:['./guilds.page.scss','./guild-rewards.scss']})
+export class GuildsPage implements OnInit{
+ guilds:GuildView[]=[];selected?:GuildView;rewards?:GuildRewards;loading=true;
+ constructor(public api:GuildApiService,private alerts:AlertController,private loaders:LoadingController){}
+ ngOnInit(){this.api.rewards().subscribe({next:r=>this.rewards=r});this.load()}
+ get hasMembership(){return this.guilds.some(g=>!!g.myStatus)}
+ get pending(){return this.selected?.members.filter(m=>m.status==='PENDING')||[]}
+ get active(){return this.selected?.members.filter(m=>m.status==='ACTIVE')||[]}
+ load(){this.loading=true;this.api.list().subscribe({next:g=>{this.guilds=g;this.loading=false;const mine=g.find(x=>x.myStatus);if(mine)this.open(mine)},error:()=>this.loading=false})}
+ open(g:GuildView){this.api.detail(g.id).subscribe(x=>this.selected=x)}
+ async create(){const a=await this.alerts.create({header:'Créer une guilde',inputs:[{name:'name',placeholder:'Nom de la guilde',attributes:{maxlength:60}},{name:'description',type:'textarea',placeholder:'Description',attributes:{maxlength:500}}],buttons:['Annuler',{text:'Créer',handler:v=>{if(v.name?.trim())this.api.create(v.name,v.description||'').subscribe(x=>{this.selected=x;this.load()})}}]});await a.present()}
+ join(){if(this.selected)this.api.join(this.selected.id).subscribe(x=>{this.selected=x;this.load()})}
+ leave(){if(this.selected)this.api.leave(this.selected.id).subscribe(()=>{this.selected=undefined;this.load()})}
+ approve(m:GuildMember){this.api.approve(this.selected!.id,m.membershipId).subscribe(x=>this.selected=x)}
+ reject(m:GuildMember){this.api.reject(this.selected!.id,m.membershipId).subscribe(()=>this.open(this.selected!))}
+ toggleAdmin(m:GuildMember){this.api.admin(this.selected!.id,m.membershipId,m.role!=='ADMIN').subscribe(x=>this.selected=x)}
+ transfer(m:GuildMember){this.api.transfer(this.selected!.id,m.membershipId).subscribe(x=>this.selected=x)}
+ async upload(event:Event,kind:'PROFILE'|'COVER'){const input=event.target as HTMLInputElement,file=input.files?.[0],guild=this.selected;if(!file||!guild)return;const loader=await this.loaders.create({message:'Compression et envoi de l’image…',spinner:'crescent',backdropDismiss:false});await loader.present();try{const optimized=await this.optimize(file,kind);this.selected=await firstValueFrom(this.api.image(guild.id,kind,optimized));this.guilds=this.guilds.map(g=>g.id===this.selected!.id?this.selected!:g);await loader.dismiss();await this.notice(kind==='PROFILE'?'Photo de guilde mise à jour.':'Couverture de guilde mise à jour.','Mise à jour réussie')}catch(error:any){await loader.dismiss();await this.notice(error?.error?.message||'Cette image ne peut pas être envoyée.','Échec de la mise à jour')}finally{input.value=''}}
+ private optimize(file:File,kind:'PROFILE'|'COVER'){return new Promise<File>((resolve,reject)=>{const image=new Image(),url=URL.createObjectURL(file);image.onload=()=>{URL.revokeObjectURL(url);const limit=kind==='PROFILE'?640:1600,scale=Math.min(1,limit/Math.max(image.width,image.height)),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(image.width*scale));canvas.height=Math.max(1,Math.round(image.height*scale));canvas.getContext('2d')?.drawImage(image,0,0,canvas.width,canvas.height);const encode=(quality:number)=>canvas.toBlob(blob=>{if(!blob)return reject();if(blob.size<=500_000)return resolve(new File([blob],`${kind.toLowerCase()}.webp`,{type:'image/webp'}));if(quality>.35)return encode(quality-.1);const copy=document.createElement('canvas');copy.width=Math.max(1,Math.round(canvas.width*.8));copy.height=Math.max(1,Math.round(canvas.height*.8));copy.getContext('2d')?.drawImage(canvas,0,0,copy.width,copy.height);canvas.width=copy.width;canvas.height=copy.height;canvas.getContext('2d')?.drawImage(copy,0,0);encode(.72)},'image/webp',quality);encode(.82)};image.onerror=()=>{URL.revokeObjectURL(url);reject()};image.src=url})}
+ private async notice(message:string,header='Image de guilde'){const alert=await this.alerts.create({header,message,buttons:['Fermer']});await alert.present()}
+}

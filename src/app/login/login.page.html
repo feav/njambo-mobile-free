@@ -1,0 +1,51 @@
+<ion-content scrollY="true">
+    <div class="main">
+        <div class="brand">
+            <img src="../../assets/images/njambo-logo.webp" width="960" height="640" alt="Njambo – Jeux de cartes">
+        </div>
+
+        <div class="auth-panel">
+            <form [formGroup]="userCredentialsFormGroup">
+                <div class="item-container">
+                    <ion-item lines="none">
+                        <ion-icon class="input-icon" slot="start" name="mail-outline"></ion-icon>
+                        <ion-input formControlName="email" type="email" placeholder="Email"></ion-input>
+                    </ion-item>
+                </div>
+                <div class="item-container">
+                    <ion-item lines="none">
+                        <ion-icon class="input-icon" slot="start" name="lock-closed-outline"></ion-icon>
+                        <ion-input formControlName="password" [type]="passwordType" placeholder="Mot de passe"></ion-input>
+                        <ion-icon
+                            class="password-icon"
+                            slot="end"
+                            [name]="passwordIconName"
+                            (click)="changePasswordType()">
+                        </ion-icon>
+                    </ion-item>
+                </div>
+                <div class="forgotten-password">
+                    <a [routerLink]="['/forgot-password-step1']">Mot de passe oublié ?</a>
+                </div>
+            </form>
+
+            <button type="button" class="login-button" (click)="login()">
+                <span>Se connecter</span>
+                <ion-icon name="arrow-forward-outline"></ion-icon>
+            </button>
+
+            <div class="separator"><span>Ou</span></div>
+
+            <div class="social-actions">
+                <div class="google-button-host" #googleButton aria-label="Continuer avec Google"></div>
+            </div>
+
+            <div class="register">Pas encore de compte ? <a [routerLink]="['/register']">Créer un compte</a></div>
+        </div>
+    </div>
+
+    <button type="button" class="demo-fab" (click)="openGuestJoin($event)" aria-label="Lancez la Démo">
+        <span class="demo-fab-label">Vous voulez tester ?</span>
+        <span class="demo-fab-cta"><ion-icon name="play-circle"></ion-icon>Lancez la Démo</span>
+    </button>
+</ion-content>

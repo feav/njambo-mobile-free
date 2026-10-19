@@ -1,0 +1,67 @@
+<ion-content fullscreen="true">
+  <main class="replay-shell" [ngClass]="gameType.toLowerCase()">
+    <header>
+      <button type="button" (click)="back()" aria-label="Retour"><ion-icon name="chevron-back"></ion-icon></button>
+      <div><small>Mode visualisation · {{ gameName }}</small><h1>Replay {{ gameName }}</h1></div>
+      <span class="replay-badge"><ion-icon name="videocam"></ion-icon> Replay</span>
+    </header>
+
+    <section class="loading" *ngIf="loading">Chargement du replay…</section>
+    <section class="loading error" *ngIf="error">{{ error }}</section>
+
+    <ng-container *ngIf="replay">
+      <section class="scoreboard">
+        <article *ngFor="let player of replay.players" [class.winner]="replay.result?.winnerPlayerId === player.gamePlayerId">
+          <span class="avatar">{{ player.username.slice(0, 1).toUpperCase() }}</span>
+          <div><strong>{{ player.username }}</strong><small>Joueur · {{ roundWins(player.gamePlayerId) }} manche(s)</small></div>
+          <ion-icon *ngIf="replay.result?.winnerPlayerId === player.gamePlayerId" name="trophy"></ion-icon>
+        </article>
+      </section>
+
+      <section class="table-stage" *ngIf="gameType === 'FAFAP'; else specializedReplay">
+        <div class="table-meta">
+          <span>Manche {{ currentRound }} / 5</span>
+          <strong>{{ currentAction ? currentAction.username + ' joue' : 'Début de la partie' }}</strong>
+          <span>Mise {{ replay.stakeAmount | number:'1.0-0':'fr' }} JETONS</span>
+        </div>
+        <div class="felt">
+          <div class="empty" *ngIf="tableCards.length === 0"><ion-icon name="play-circle-outline"></ion-icon><span>Lancez le replay</span></div>
+          <article class="playing-card" *ngFor="let action of tableCards" [class.red]="action.card.suit === 'KOUBI' || action.card.suit === 'ZINK'">
+            <span>{{ action.card.value }}</span>
+            <b>{{ suitSymbol(action.card.suit) }}</b>
+            <small>{{ action.username }}</small>
+          </article>
+        </div>
+        <div class="event-line">
+          <ng-container *ngIf="currentAction; else intro">
+            <strong>Action {{ currentAction.order }}</strong>
+            <span>{{ currentAction.username }} pose le {{ currentAction.card.value }} {{ suitSymbol(currentAction.card.suit) }}</span>
+          </ng-container>
+          <ng-template #intro><strong>Prêt</strong><span>Utilisez Lecture ou les flèches pour parcourir la partie.</span></ng-template>
+        </div>
+      </section>
+
+      <ng-template #specializedReplay>
+        <section class="specialized-replay">
+          <img [src]="gameIcon" [alt]="gameName">
+          <div><small>Replay spécialisé</small><h2>{{ gameName }}</h2><p>{{ replayHint }}</p></div>
+          <span class="result-pill"><ion-icon name="trophy"></ion-icon>{{ replay.result ? playerName(replay.result.winnerPlayerId) : 'Partie annulée' }}</span>
+          <p class="replay-notice">Cette partie est correctement identifiée comme {{ gameName }}. Son historique ne sera plus affiché avec les cartes ou les manches FapFap.</p>
+        </section>
+      </ng-template>
+
+      <section class="replay-controls" *ngIf="gameType === 'FAFAP'">
+        <input type="range" min="0" [max]="replay.actions.length" [value]="step" (input)="seek($event)" aria-label="Position du replay">
+        <div class="control-row">
+          <span>{{ step }} / {{ replay.actions.length }}</span>
+          <div>
+            <button type="button" (click)="previous()" [disabled]="step === 0" aria-label="Action précédente"><ion-icon name="play-skip-back"></ion-icon></button>
+            <button type="button" class="play" (click)="togglePlay()" [disabled]="replay.actions.length === 0" aria-label="Lecture ou pause"><ion-icon [name]="playing ? 'pause' : 'play'"></ion-icon></button>
+            <button type="button" (click)="next()" [disabled]="step === replay.actions.length" aria-label="Action suivante"><ion-icon name="play-skip-forward"></ion-icon></button>
+          </div>
+          <span>{{ replay.result ? playerName(replay.result.winnerPlayerId) : 'Annulée' }}</span>
+        </div>
+      </section>
+    </ng-container>
+  </main>
+</ion-content>

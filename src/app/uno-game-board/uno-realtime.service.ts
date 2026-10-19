@@ -1,0 +1,20 @@
+import {Injectable,OnDestroy} from '@angular/core';
+import {BehaviorSubject,Observable,Subject} from 'rxjs';
+import {Client,IMessage,StompSubscription} from '@stomp/stompjs';
+import {environment} from '../../environments/environment';
+import {AuthService} from '../core/auth.service';
+
+interface SocketEvent<T>{eventType:string;gameId:string;payload:T}
+
+@Injectable({providedIn:'root'})
+export class UnoRealtimeService implements OnDestroy{
+  private client?:Client;private subscription?:StompSubscription;private spectatorSubscription?:StompSubscription;
+  private readonly stateSubject=new Subject<unknown>();private readonly connectedSubject=new BehaviorSubject(false);private readonly errorSubject=new Subject<string>();private readonly spectatorCountSubject=new BehaviorSubject(0);
+  readonly state$:Observable<unknown>=this.stateSubject.asObservable();readonly connected$=this.connectedSubject.asObservable();readonly errors$=this.errorSubject.asObservable();readonly spectatorCount$=this.spectatorCountSubject.asObservable();
+  constructor(private auth:AuthService){}
+  connect(gameId:string,spectating=false){this.disconnect();const token=this.auth.accessToken();this.client=new Client({brokerURL:`${environment.apiBaseUrl.replace(/^http/,'ws')}/ws-native`,connectHeaders:token?{Authorization:`Bearer ${token}`}:{},reconnectDelay:1800,heartbeatIncoming:10000,heartbeatOutgoing:10000,connectionTimeout:8000,debug:()=>undefined});this.client.onConnect=()=>{this.connectedSubject.next(true);if(spectating)this.subscription=this.client?.subscribe(`/topic/games/${gameId}`,message=>this.consume(gameId,message));else{this.subscription=this.client?.subscribe(`/user/queue/games/${gameId}`,message=>this.consume(gameId,message));this.client?.publish({destination:`/app/games/${gameId}/uno/sync`,body:'{}'});}this.spectatorSubscription=this.client?.subscribe(`/topic/games/${gameId}/spectators`,message=>this.consumeSpectatorCount(gameId,message));};this.client.onWebSocketClose=()=>this.connectedSubject.next(false);this.client.onDisconnect=()=>this.connectedSubject.next(false);this.client.onStompError=frame=>{this.connectedSubject.next(false);this.errorSubject.next(frame.headers['message']||'Connexion temps réel indisponible');};this.client.activate();}
+  disconnect(){this.subscription?.unsubscribe();this.subscription=undefined;this.spectatorSubscription?.unsubscribe();this.spectatorSubscription=undefined;this.spectatorCountSubject.next(0);if(this.client?.active)void this.client.deactivate();this.client=undefined;this.connectedSubject.next(false);}
+  ngOnDestroy(){this.disconnect();}
+  private consume(gameId:string,message:IMessage){try{const event=JSON.parse(message.body)as SocketEvent<unknown>;if(event.gameId===gameId&&(event.eventType==='UNO_STATE_UPDATED'||event.eventType==='UNO_SPECTATOR_STATE_UPDATED'))this.stateSubject.next(event.payload);}catch{this.errorSubject.next('Événement UNO invalide');}}
+  private consumeSpectatorCount(gameId:string,message:IMessage){try{const value=JSON.parse(message.body)as{gameId:string;count:number};if(value.gameId===gameId)this.spectatorCountSubject.next(value.count);}catch{}}
+}

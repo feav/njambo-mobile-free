@@ -1,0 +1,27 @@
+<ion-content>
+  <main class="uno-board">
+    <header><button routerLink="/search" aria-label="Retour aux parties">‹</button><div><small>NJAMBO · UNO</small><strong>Table {{metadata?.gameId?.slice(0,8)?.toUpperCase()}}</strong></div><span *ngIf="spectating" class="spectator-badge"><ion-icon name="eye-outline"></ion-icon> {{spectatorCount}}</span><span *ngIf="!spectating">{{state?.status||'CHARGEMENT'}}</span></header>
+    <div class="spectator-banner" *ngIf="spectating"><ion-icon name="eye-outline"></ion-icon> Vous regardez en spectateur</div>
+    <app-game-table-tools *ngIf="state" [gameId]="state.gameId" [players]="state.players" [currentPlayerId]="state.currentPlayerId" [meGamePlayerId]="state.meGamePlayerId" [deadline]="state.currentTurnDeadline" [status]="state.status" [lobbyEnabled]="true" gameType="UNO"></app-game-table-tools>
+    <app-game-stake-info *ngIf="state" [gameId]="state.gameId"></app-game-stake-info>
+    <div class="uno-callout" *ngIf="unoCallout" [class.penalty]="calloutWord!== 'UNO'" aria-live="assertive"><strong>{{calloutWord}} !</strong><span>{{unoCallout}}</span></div>
+    <section class="table" [class.spectating]="spectating" *ngIf="state&&(state.status==='IN_PROGRESS'||state.status==='FINISHED'||state.status==='SETTLING')">
+      <div class="opponent" *ngFor="let p of opponents;let i=index;trackBy:trackPlayer" [ngStyle]="playerStyle(i,opponents.length)" [class.current]="p.current" [class.solo]="opponents.length===1">
+        <div class="avatar-ring" appPlayerProfile [appPlayerProfile]="{userId:p.userId,username:p.username,avatarUrl:p.avatarUrl,countryCode:p.countryCode}"><img [src]="p.avatarUrl" [alt]="'Avatar de '+p.username"><span class="turn-hand" *ngIf="p.current"><i class="fas fa-hand-paper"></i></span></div><div class="player-name"><b>{{p.username}}</b><app-player-badges [userId]="p.userId" [countryCode]="p.countryCode" gameType="UNO"></app-player-badges></div>
+        <div class="opponent-hand"><i class="card-back" *ngFor="let ignored of visibleBacks(p);let cardIndex=index" [style.transform]="'translateX('+(cardIndex*8)+'px) rotate('+(cardIndex*4-6)+'deg)'"><span>N</span></i><i class="card-overflow" *ngIf="extraCards(p)>0">+{{extraCards(p)}}</i></div>
+      </div>
+      <div class="piles"><button class="deck" [class.suggest-draw]="suggestDraw" (click)="draw()" [disabled]="!myTurn||busy"><span class="uno-back-mark">N</span><small>PIOCHER · {{state.drawPileCount}}</small></button><div class="draw-hint" *ngIf="suggestDraw" role="status" aria-live="polite">Aucune carte jouable<b>Piochez</b></div><div class="discard-stack"><div class="discard discard-card" *ngFor="let card of state.discardCards;let i=index;trackBy:trackCard" [ngClass]="css(card)" [ngStyle]="discardStyle(i,state.discardCards.length)"><span class="uno-card-corner top">{{label(card)}}</span><span class="uno-card-oval">{{label(card)}}</span><span class="uno-card-corner bottom">{{label(card)}}</span></div></div><i>{{state.direction===1?'↻':'↺'}}</i><div class="active-orb-wrap" *ngIf="state.activeColor" aria-hidden="true"><i class="active-orb-shadow"></i><i class="active-orb" [ngClass]="state.activeColor.toLowerCase()"></i></div></div>
+      <div class="card-flight" *ngFor="let flight of flights" [ngStyle]="flightStyle(flight)"><span>N</span></div>
+      <div class="active-color"><span [ngClass]="(state.activeColor||'WILD').toLowerCase()"></span>Couleur active : {{state.activeColor}}</div>
+      <div class="me" [class.current]="myTurn" *ngIf="!spectating">
+        <button type="button" class="automation-switch" [class.enabled]="displayAutomaticMode" [disabled]="busy" [attr.aria-pressed]="displayAutomaticMode" [attr.aria-label]="displayAutomaticMode ? 'Désactiver le mode automatique' : 'Activer le mode automatique'" (click)="automation()">
+          <span>{{displayAutomaticMode ? 'Auto' : 'Manuel'}}</span><i aria-hidden="true"></i>
+        </button>
+        <div class="avatar-ring" appPlayerProfile [appPlayerProfile]="{userId:me?.userId,username:me?.username,avatarUrl:me?.avatarUrl,countryCode:me?.countryCode}"><img [src]="me?.avatarUrl" [alt]="'Avatar de '+(me?.username||'Joueur')"><span class="turn-hand" *ngIf="myTurn"><i class="fas fa-hand-paper"></i></span></div><div class="player-name"><b>{{me?.username}}</b><app-player-badges [userId]="me?.userId" [countryCode]="me?.countryCode" gameType="UNO"></app-player-badges></div>
+      </div>
+      <div class="hand"><button *ngFor="let card of sortedHand;trackBy:trackCard" [ngClass]="css(card)" [class.playable-card]="myTurn&&isPlayable(card)" [class.blocked-card]="myTurn&&!isPlayable(card)" (click)="play(card)" [disabled]="!myTurn||busy"><span class="uno-card-corner top">{{label(card)}}</span><span class="uno-card-oval">{{label(card)}}</span><span class="uno-card-corner bottom">{{label(card)}}</span></button></div>
+    </section>
+    <div class="color-picker" *ngIf="wild"><strong>Choisissez une couleur</strong><div><button class="red" (click)="choose('RED')"></button><button class="yellow" (click)="choose('YELLOW')"></button><button class="green" (click)="choose('GREEN')"></button><button class="blue" (click)="choose('BLUE')"></button></div></div>
+    <p class="message" *ngIf="message">{{message}}</p>
+  </main>
+</ion-content>

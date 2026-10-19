@@ -1,0 +1,6 @@
+<section class="empty-state" [class.compact]="compact" role="status" aria-live="polite">
+  <div class="empty-icon"><ion-icon [name]="icon"></ion-icon></div>
+  <h3>{{ title }}</h3>
+  <p>{{ message }}</p>
+  <button *ngIf="actionLabel" type="button" (click)="action.emit()">{{ actionLabel }}</button>
+</section>

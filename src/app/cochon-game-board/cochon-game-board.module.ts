@@ -1,0 +1,23 @@
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { IonicModule } from '@ionic/angular';
+import { CochonGameBoardPage } from './cochon-game-board.page';
+import { GameTableToolsComponent } from '../shared/game-table-tools/game-table-tools.component';
+import { PlayerBadgesComponent } from '../shared/player-badges/player-badges.component';
+import { GameStakeInfoComponent } from '../shared/game-stake-info/game-stake-info.component';
+import { PlayerProfileTriggerDirective } from '../shared/player-profile-trigger/player-profile-trigger.directive';
+
+@NgModule({
+  imports: [
+    CommonModule,
+    IonicModule,
+    GameTableToolsComponent,
+    PlayerBadgesComponent,
+    GameStakeInfoComponent,
+    PlayerProfileTriggerDirective,
+    RouterModule.forChild([{ path: '', component: CochonGameBoardPage }])
+  ],
+  declarations: [CochonGameBoardPage]
+})
+export class CochonGameBoardPageModule {}

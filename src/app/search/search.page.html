@@ -1,0 +1,88 @@
+<!-- Liste des parties -->
+<app-page-header [title]="activeTab === 'a-venir' ? 'Parties disponibles' : activeTab === 'en-cours' ? 'Parties en cours' : 'Parties terminées'"></app-page-header>
+
+<ion-content fullscreen="true">
+    <main class="search-shell">
+        <section class="search-controls">
+            <div class="tabs-row">
+                <button class="tab" [class.active]="activeTab === 'a-venir'" (click)="setTab('a-venir')"><span>Disponibles</span><strong>{{ tabTotals['a-venir'] }}</strong></button>
+                <button class="tab" [class.active]="activeTab === 'en-cours'" (click)="setTab('en-cours')" [attr.aria-label]="platformInProgressCount + ' parties en cours sur la plateforme'" title="Parties en cours sur la plateforme"><span>En cours</span><strong>{{ platformInProgressCount }}</strong></button>
+                <button class="tab" [class.active]="activeTab === 'terminees'" (click)="setTab('terminees')"><span>Terminées</span><strong>{{ tabTotals['terminees'] }}</strong></button>
+            </div>
+            <div class="actions-row">
+                <button type="button" class="refresh-button" [class.refreshing]="loading" [disabled]="loading" aria-label="Actualiser les parties" title="Actualiser" (click)="loadGames()"><ion-icon name="refresh-outline"></ion-icon></button>
+                <button type="button" [class.active]="searchOpen || searchQuery" [attr.aria-expanded]="searchOpen" aria-controls="game-search-panel" aria-label="Rechercher une partie" (click)="toggleSearch()"><ion-icon [name]="searchOpen ? 'close-outline' : 'search-outline'"></ion-icon></button>
+                <button type="button" class="filter-button" [class.active]="filterOpen || selectedPlayerCount !== null || selectedGameType !== null || selectedAccessType !== null" [attr.aria-expanded]="filterOpen" aria-controls="search-filters" aria-label="Filtrer les parties" (click)="toggleFilters()"><ion-icon name="funnel"></ion-icon><span>Filtrer</span></button>
+            </div>
+        </section>
+
+        <section *ngIf="searchOpen" id="game-search-panel" class="game-search-panel">
+            <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
+            <ion-input id="game-search" type="search" inputmode="search" [value]="searchQuery" (ionInput)="setSearchQuery($any($event).detail.value)" placeholder="Code, joueur, jeu ou mise…" clearInput="true" aria-label="Rechercher dans les parties"></ion-input>
+            <span *ngIf="searchQuery">{{ tables.length }} résultat{{ tables.length > 1 ? 's' : '' }}</span>
+        </section>
+
+        <section *ngIf="filterOpen" id="search-filters" class="filter-panel" aria-label="Filtres des parties">
+            <strong>Type de jeu</strong>
+            <div class="filter-options game-type-options">
+                <button type="button" [class.active]="selectedGameType === null" (click)="setGameTypeFilter(null)">Tous les jeux</button>
+                <button type="button" *ngFor="let type of gameTypes" [class.active]="selectedGameType === type" (click)="setGameTypeFilter(type)">{{ type === 'FAFAP' ? 'FapFap' : type === 'PRESIDENT' ? 'Président (Trou du cul)' : type === 'UNO' ? 'UNO' : type === 'CHECK_GAMES' ? 'Tcheck Game' : type === 'TCHIA_DIRECT' ? '21 Direct' : type === 'TCHIA_IMPOT' ? '21 Impot' : type === 'TCHIA_GARAME' ? '21 Garame' : 'Cochon Gratté' }}</button>
+            </div>
+            <strong>Nombre de joueurs</strong>
+            <div class="filter-options">
+                <button type="button" [class.active]="selectedPlayerCount === null" (click)="setPlayerCountFilter(null)">Tous</button>
+                <button type="button" *ngFor="let count of [2, 3, 4]" [class.active]="selectedPlayerCount === count" (click)="setPlayerCountFilter(count)">{{ count }} joueurs</button>
+            </div>
+            <strong>Accès</strong>
+            <div class="filter-options">
+                <button type="button" [class.active]="selectedAccessType === null" (click)="setAccessTypeFilter(null)">Tous</button>
+                <button type="button" [class.active]="selectedAccessType === 'PUBLIC'" (click)="setAccessTypeFilter('PUBLIC')">Publiques</button>
+                <button type="button" [class.active]="selectedAccessType === 'PRIVATE'" (click)="setAccessTypeFilter('PRIVATE')">Privées</button>
+            </div>
+            <button *ngIf="selectedPlayerCount !== null || selectedGameType !== null || selectedAccessType !== null" type="button" class="reset-filter" (click)="resetFilters()">Réinitialiser</button>
+        </section>
+
+        <section class="table-list">
+            <p *ngIf="loading">Chargement des parties…</p>
+            <app-empty-state *ngIf="!loading && tables.length === 0"
+                icon="game-controller-outline"
+                title="Aucune partie disponible"
+                message="Aucune table ne correspond à cette catégorie pour le moment. Vous pouvez actualiser ou créer une nouvelle partie."
+                actionLabel="Actualiser"
+                (action)="loadGames()">
+            </app-empty-state>
+            <article class="table-card" *ngFor="let table of visibleTables; trackBy: trackTable">
+                <div class="table-left">
+                    <div class="table-badge" [ngClass]="table.gameClass"><img [src]="table.icon" [alt]="table.gameName"><span>{{table.gameName}}</span></div>
+                    <div class="table-copy">
+                        <div class="table-tag"><i class="fas fa-crown"></i>{{ table.label }}</div>
+                        <h2>{{ table.title }}</h2>
+                        <p>No. {{ table.code }} <ng-container *ngIf="activeTab !== 'terminees'"><span>•</span> Blindes {{ table.blinds }}</ng-container></p>
+                        <div class="players">
+                            <img *ngFor="let player of table.players; let playerIndex = index; trackBy: trackPlayerAvatar" [src]="player" alt="Avatar joueur">
+                            <span *ngIf="table.extraPlayers > 0" [attr.aria-label]="table.extraPlayers + ' autres joueurs'">+{{ table.extraPlayers }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-right">
+                    <div class="status-note" [ngClass]="table.statusClass">{{ table.status }} <span></span></div>
+                    <div class="metrics">
+                        <div *ngIf="activeTab !== 'terminees'"><span>Pot actuel</span><strong>{{ table.pot }}</strong></div>
+                        <div><span>Temps restant</span><strong><ion-icon name="time-outline"></ion-icon>{{ table.time }}</strong></div>
+                    </div>
+                    <button type="button" class="join-button" [class.disabled]="table.actionDisabled" [disabled]="table.actionDisabled" (click)="joinTable(table)">{{ table.action }}</button>
+                </div>
+            </article>
+            <ion-infinite-scroll [disabled]="!hasMoreTables || loading || loadingMore" threshold="120px" (ionInfinite)="loadMoreTables($event)">
+                <ion-infinite-scroll-content loadingSpinner="crescent" loadingText="Chargement des parties suivantes…"></ion-infinite-scroll-content>
+            </ion-infinite-scroll>
+        </section>
+    </main>
+
+    <button type="button" class="quick-match-fab" (click)="openQuickMatch()" aria-label="Jouer maintenant">
+        <ion-icon name="game-controller-outline"></ion-icon>
+    </button>
+</ion-content>
+
+<app-bottom-nav active="game"></app-bottom-nav>

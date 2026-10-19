@@ -1,0 +1,47 @@
+<app-page-header [title]="detail?.championship?.name || 'Championnat'" [showAdd]="false"></app-page-header>
+<ion-content class="championship-content">
+  <div class="bracket detail-page">
+    <div class="loading detail-loading" *ngIf="loading"><ion-spinner name="crescent"></ion-spinner><span>Chargement du championnat…</span></div>
+    <section class="detail-error" *ngIf="!loading && error"><ion-icon name="alert-circle-outline"></ion-icon><strong>{{error}}</strong><a routerLink="/championships">Retour aux championnats</a></section>
+    <ng-container *ngIf="detail">
+      <section class="detail-hero">
+        <div class="detail-hero-art" aria-hidden="true">
+          <span class="hero-halo"></span>
+          <img src="assets/images/home/recent-games/cup.png" alt="">
+          <ion-icon name="trophy"></ion-icon>
+        </div>
+        <div class="detail-hero-copy">
+          <span class="detail-kicker">Championnat · {{gameName(detail.championship.gameType)}}</span>
+          <h1>{{detail.championship.name}}</h1>
+          <div class="hero-wallet"><small>Jetons du championnat</small><strong>{{myParticipant ? (myParticipant.walletBalance|number:'1.0-0')+' JETONS' : 'Non inscrit'}}</strong></div>
+          <p>{{readinessMessage || statusMessage}}</p>
+          <div class="detail-hero-actions">
+            <button class="refresh-action" [disabled]="refreshing" (click)="refreshNow()"><ion-icon name="refresh-outline" [class.spinning]="refreshing"></ion-icon><span>Actualiser</span></button>
+            <button *ngIf="canJoinRegistration" class="primary" [disabled]="actionBusy" (click)="confirmJoin()"><ion-icon name="person-add-outline"></ion-icon> S’inscrire au championnat</button>
+            <button *ngIf="myParticipant && myCurrentGame" class="play-action" (click)="openCurrentGame()"><ion-icon name="play"></ion-icon> Rejoindre ma partie</button>
+            <button *ngIf="canLeaveRegistration" class="danger" [disabled]="actionBusy" (click)="confirmLeave()"><ion-icon name="exit-outline"></ion-icon> Se désinscrire</button>
+            <button *ngIf="canCancelRegistration" class="danger" [disabled]="actionBusy" (click)="confirmCancel()"><ion-icon name="trash-outline"></ion-icon> Annuler le championnat</button>
+            <button *ngIf="canAbandon" class="danger" [disabled]="actionBusy" (click)="confirmAbandon()"><ion-icon name="flag-outline"></ion-icon> Abandonner</button>
+          </div>
+        </div>
+      </section>
+      <section class="championship-gains"><span><small>Participation</small><strong>{{detail.championship.entryFee|number:'1.0-0'}} JETONS</strong></span><span><small>Récompense du champion</small><strong>{{estimatedChampionGain()|number:'1.0-0'}} JETONS</strong></span><span><small>Récompense du finaliste</small><strong>{{estimatedFinalistGain()|number:'1.0-0'}} JETONS</strong></span></section>
+      <section class="bracket-guide"><span><i class="legend-dot waiting"></i> Place disponible</span><span><i class="legend-dot victory"></i> Victoire</span><span><i class="legend-dot defeat"></i> Éliminé</span><small>Fais défiler le tableau horizontalement</small></section>
+      <div class="bracket-scroll"><div class="bracket-tree">
+        <section class="bracket-round" *ngFor="let column of bracketRounds; trackBy: trackRound">
+          <header><span>Étape {{column.round}}</span><h3>{{column.name}}</h3></header>
+          <div class="round-matches">
+            <article class="tree-match" *ngFor="let node of column.matches; trackBy: trackMatch" [class.finished]="node.match?.status==='FINISHED'" [class.running]="node.match?.status==='RUNNING'">
+              <button class="spectate-btn" *ngIf="liveGame(node.match)" (click)="spectate(node.match,$event)" title="Regarder en direct"><ion-icon name="eye-outline"></ion-icon></button>
+              <div class="tree-player" [ngClass]="outcome(node.match,node.first)"><div class="profile-bubble" [class.empty]="!player(node.first)"><img *ngIf="player(node.first)?.avatarUrl" [src]="player(node.first)?.avatarUrl"><ion-icon *ngIf="!player(node.first)?.avatarUrl" [name]="player(node.first)?'person':'add'"></ion-icon><i *ngIf="outcome(node.match,node.first)==='victory'"><ion-icon name="checkmark"></ion-icon></i><i *ngIf="outcome(node.match,node.first)==='defeat'"><ion-icon name="close"></ion-icon></i></div><span><strong>{{player(node.first)?.username||'Place disponible'}}</strong><small *ngIf="node.match?.status==='FINISHED'">{{outcome(node.match,node.first)==='victory'?'Qualifié':'Éliminé'}}</small><small *ngIf="node.match?.status==='RUNNING'">Match en cours</small></span><b>{{score(node.match,1)}}</b></div>
+              <div class="versus"><span>VS</span><small *ngIf="node.match?.games?.length">{{node.match?.games?.[0]?.stakeAmount|number:'1.0-0'}} JETONS</small></div>
+              <div class="tree-player" [ngClass]="outcome(node.match,node.second)"><div class="profile-bubble" [class.empty]="!player(node.second)"><img *ngIf="player(node.second)?.avatarUrl" [src]="player(node.second)?.avatarUrl"><ion-icon *ngIf="!player(node.second)?.avatarUrl" [name]="player(node.second)?'person':'add'"></ion-icon><i *ngIf="outcome(node.match,node.second)==='victory'"><ion-icon name="checkmark"></ion-icon></i><i *ngIf="outcome(node.match,node.second)==='defeat'"><ion-icon name="close"></ion-icon></i></div><span><strong>{{player(node.second)?.username||'Place disponible'}}</strong><small *ngIf="node.match?.status==='FINISHED'">{{outcome(node.match,node.second)==='victory'?'Qualifié':'Éliminé'}}</small><small *ngIf="node.match?.status==='RUNNING'">Match en cours</small></span><b>{{score(node.match,2)}}</b></div>
+            </article>
+          </div>
+        </section>
+        <section class="champion-column"><header><span>Champion</span><h3>Vainqueur</h3></header><div class="champion-podium"><div class="profile-bubble crown" [class.empty]="!detail.championship.winnerUserId"><img *ngIf="detail.championship.winnerUserId && player(detail.matches[detail.matches.length-1]?.winnerParticipantId)?.avatarUrl" [src]="player(detail.matches[detail.matches.length-1]?.winnerParticipantId)?.avatarUrl"><ion-icon *ngIf="!detail.championship.winnerUserId" name="trophy-outline"></ion-icon></div><strong>{{detail.championship.winnerUserId?player(detail.matches[detail.matches.length-1]?.winnerParticipantId)?.username:'À couronner'}}</strong></div></section>
+      </div></div>
+    </ng-container>
+  </div>
+</ion-content>
+<app-bottom-nav active="home"></app-bottom-nav>

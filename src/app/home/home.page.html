@@ -1,0 +1,69 @@
+<ion-header>
+    <ion-toolbar class="home-toolbar" hide-back-button>
+        <div class="header-shell">
+            <button type="button" class="header-profile" (click)="goToProfilePage()">
+                <span class="avatar-ring"><img class="header-avatar" [src]="avatarUrl" [alt]="'Avatar de ' + username"><i class="fas fa-crown"></i></span>
+                <span class="header-identity"><strong>{{ username }}</strong><span class="vip-badge"><i class="fas fa-shield-alt"></i> VIP Bronze</span></span>
+            </button>
+            <button type="button" class="header-balance" (click)="goToTransactionsPage()"><span>Solde</span><strong>{{ balance | number:'1.0-2':'fr' }} JETONS</strong><i class="fas fa-plus"></i></button>
+            <div class="header-actions">
+                <button type="button" class="toolbar-icon notification" aria-label="Notifications"><ion-icon name="notifications-outline"></ion-icon><span></span></button>
+                <button type="button" class="toolbar-icon" aria-label="Réglages" routerLink="/settings" routerDirection="root" [replaceUrl]="true"><ion-icon name="settings-outline"></ion-icon></button>
+            </div>
+        </div>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content fullscreen="true">
+    <main class="home-shell">
+        <section class="live-hero" (click)="goToGameBoardPage($event)">
+            <div class="hero-copy"><span>Tables</span><h1>Live</h1><p>Joue contre de vrais joueurs<br>en temps réel.</p><button type="button">Jouer maintenant <ion-icon name="chevron-forward"></ion-icon></button></div>
+            <div class="live-presence"><span class="avatar-stack"><img *ngFor="let friend of friendPreview; trackBy: trackFriend" [src]="friend.avatarUrl" [alt]="friend.username"><img *ngIf="!friendPreview.length" [src]="avatarUrl" alt=""></span><i></i>{{ friends.length || 1 }} joueur{{ (friends.length || 1) > 1 ? 's' : '' }} disponible{{ (friends.length || 1) > 1 ? 's' : '' }}</div>
+        </section>
+
+        <section class="dashboard-actions">
+            <a *ngFor="let action of quickActions; trackBy: trackQuickAction" [routerLink]="action.route" routerDirection="root" [replaceUrl]="true" [class]="'action-card action-card--' + action.tone">
+                <img [src]="action.image" alt=""><strong>{{ action.label }}</strong><small>{{ action.subtitle }}</small><span class="action-cta">{{ action.cta }} <ion-icon name="chevron-forward"></ion-icon></span>
+            </a>
+        </section>
+
+        <section class="moment-section">
+            <h2>En ce moment</h2>
+            <article class="championship-card" routerLink="/championships" routerDirection="root" [replaceUrl]="true">
+                <img src="../../assets/images/home/recent-games/cup.png" alt="">
+                <div><strong>Championnat FapFap</strong><span>Découvre les compétitions en cours</span><small><i class="fas fa-trophy"></i> Rejoins le prochain tour</small></div>
+                <button type="button">Voir les championnats <ion-icon name="chevron-forward"></ion-icon></button>
+            </article>
+        </section>
+
+        <section class="friends-strip">
+            <div class="strip-head"><h2>Tes amis</h2><a routerLink="/friends" routerDirection="root" [replaceUrl]="true">Voir tous <ion-icon name="chevron-forward"></ion-icon></a></div>
+            <div class="friend-list" *ngIf="friends.length; else noFriends"><a *ngFor="let friend of friendPreview; trackBy: trackFriend" routerLink="/friends" routerDirection="root" [replaceUrl]="true" [title]="friend.username"><img [src]="friend.avatarUrl" [alt]="friend.username"><i></i></a><a class="more-friends" routerLink="/friends" routerDirection="root" [replaceUrl]="true" *ngIf="friends.length > friendPreview.length">+{{ friends.length - friendPreview.length }}</a></div>
+            <ng-template #noFriends><a class="friends-empty" routerLink="/friends" routerDirection="root" [replaceUrl]="true"><ion-icon name="person-add-outline"></ion-icon> Ajouter tes premiers amis</a></ng-template>
+        </section>
+
+        <section class="activity-section">
+            <div class="strip-head"><h2>Activité récente</h2><a [routerLink]="['/search']" routerDirection="root" [replaceUrl]="true" [queryParams]="{ tab: 'terminees' }">Voir plus</a></div>
+            <div class="activity-grid" *ngIf="!recentLoading && recentTables.length">
+                <article class="activity-card" *ngFor="let table of recentTables | slice:0:2; trackBy: trackRecentTable" [class.activity-card--loss]="table.statusClass === 'defeat'" (click)="openRecentGame(table.gameId, $event)">
+                    <img [src]="table.image" alt=""><div><strong [class]="table.statusClass">{{ table.status }}</strong><span>{{ table.title }}</span><small>{{ table.subtitle }}</small></div><b>{{ table.amount }}</b><button type="button">Rejouer <ion-icon name="chevron-forward"></ion-icon></button>
+                </article>
+            </div>
+            <p class="recent-loading" *ngIf="recentLoading">Chargement de ton activité…</p>
+            <app-empty-state *ngIf="!recentLoading && !recentTables.length" icon="time-outline" title="Aucune partie récente" message="Tes dernières parties apparaîtront ici." actionLabel="Jouer" (action)="goToWaitingTablesPage()"></app-empty-state>
+        </section>
+
+        <section class="promo-slider promo-slider--legacy" (scroll)="onPromoScroll($event)">
+            <article class="promo-card" *ngFor="let promo of promoSlides; trackBy: trackPromo" [style.--promo-background]="'url(' + promo.background + ')'">
+                <div class="promo-copy">
+                    <div class="promo-title"><i class="fas fa-crown" aria-hidden="true"></i><span>{{ promo.title }}</span><i class="fas fa-crown" aria-hidden="true"></i></div>
+                    <p>{{ promo.description }}</p>
+                    <button type="button" routerLink="/rules" routerDirection="root" [replaceUrl]="true">En savoir plus</button>
+                </div>
+            </article>
+        </section>
+        <div class="promo-dots" aria-label="Position dans le carrousel"><span *ngFor="let promo of promoSlides; let index = index; trackBy: trackPromo" [class.active]="index === activePromo"></span></div>
+    </main>
+</ion-content>
+
+<app-bottom-nav active="home"></app-bottom-nav>

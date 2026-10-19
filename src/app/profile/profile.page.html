@@ -1,0 +1,121 @@
+<!-- Page profil -->
+<app-page-header title="Profil"></app-page-header>
+
+<ion-content fullscreen="true">
+    <main class="profile-shell">
+        <section class="profile-hero">
+            <div class="identity-block">
+                <div class="avatar-wrap">
+                    <img [src]="avatarUrl" [alt]="'Avatar de ' + username">
+                    <input #avatarInput type="file" accept="image/jpeg,image/png,image/webp"
+                           (change)="uploadAvatar($event)" hidden>
+                    <button type="button" (click)="avatarInput.click()" aria-label="Créer mon avatar à partir d’une photo"
+                            [disabled]="avatarGenerating">
+                        <ion-icon [name]="avatarGenerating ? 'hourglass-outline' : 'camera-outline'"></ion-icon>
+                    </button>
+                </div>
+                <div class="identity-copy">
+                    <span class="vip-badge"><i class="fas fa-shield-alt"></i> VIP Bronze</span>
+                    <h1>{{ username }}</h1>
+                    <p>@{{ username }}</p>
+                    <small *ngIf="createdAt">Membre depuis le {{ createdAt | date:'longDate' }}</small>
+                </div>
+            </div>
+
+            <div class="wallet-card">
+                <span>Solde disponible</span>
+                <strong>{{ balance | number:'1.0-2':'fr' }} <img src="../../assets/icon/jeton.png" alt="Jetons"></strong>
+                <button type="button" routerLink="/transactions">Voir mes transactions</button>
+            </div>
+            <div class="avatar-quality" aria-label="Qualité du prochain avatar"><div><span>Qualité de l’avatar</span><small>Low est gratuit · débit uniquement après génération</small></div><div class="quality-options"><button type="button" *ngFor="let quality of avatarQualities" [class.active]="avatarQuality===quality.value" (click)="avatarQuality=quality.value" [disabled]="avatarGenerating"><strong>{{quality.label}}</strong><em>{{quality.price?quality.price+' F':'Gratuit'}}</em><small>{{quality.description}}</small></button></div></div>
+        </section>
+
+        <section class="stats-grid" aria-label="Statistiques du joueur">
+            <article>
+                <i class="fas fa-gamepad"></i>
+                    <strong>{{ profileStats?.gamesPlayed || 0 }}</strong>
+                <span>Parties jouées</span>
+            </article>
+            <article>
+                <i class="fas fa-trophy"></i>
+                    <strong>{{ profileStats?.wins || 0 }}</strong>
+                <span>Victoires</span>
+            </article>
+            <article>
+                <i class="fas fa-percentage"></i>
+                    <strong>{{ profileStats ? ((profileStats.wins / (profileStats.gamesPlayed || 1)) * 100 | number:'1.0-1') : 0 }}%</strong>
+                <span>Taux de victoire</span>
+            </article>
+            <article>
+                    <i class="fas fa-crown"></i>
+                <strong>{{ profileStats?.championshipsWon || 0 }}</strong>
+                <span>Championnats remportés</span>
+            </article>
+        </section>
+
+        <section class="details-card">
+            <div class="section-heading">
+                <div>
+                    <span>Compte</span>
+                    <h2>Informations personnelles</h2>
+                </div>
+                <ion-icon name="person-outline"></ion-icon>
+            </div>
+
+            <form [formGroup]="profileFormGroup">
+                <label class="field">
+                    <span>Nom et prénom</span>
+                    <div class="field-control">
+                        <ion-icon name="person-outline"></ion-icon>
+                        <ion-input formControlName="name" type="text"></ion-input>
+                    </div>
+                </label>
+                <label class="field">
+                    <span>Date de naissance</span>
+                    <div class="field-control">
+                        <ion-icon name="calendar-outline"></ion-icon>
+                        <ion-input formControlName="birthdate" type="date"></ion-input>
+                    </div>
+                </label>
+                <label class="field">
+                    <span>Téléphone</span>
+                    <div class="field-control" [class.invalid]="profileFormGroup.get('telephone')?.invalid && profileFormGroup.get('telephone')?.touched">
+                        <ion-icon name="call-outline"></ion-icon>
+                        <ion-input formControlName="telephone" type="tel" placeholder="+237655123456"></ion-input>
+                    </div>
+                    <small class="field-error" *ngIf="profileFormGroup.get('telephone')?.invalid && profileFormGroup.get('telephone')?.touched">Format attendu : + indicatif suivi du numéro (ex. +237655123456).</small>
+                </label>
+                <label class="field">
+                    <span>Email</span>
+                    <div class="field-control">
+                        <ion-icon name="mail-outline"></ion-icon>
+                        <ion-input formControlName="email" type="email"></ion-input>
+                    </div>
+                </label>
+                <label class="field">
+                    <span>Sexe</span>
+                    <div class="field-control">
+                        <ion-icon name="male-female-outline"></ion-icon>
+                        <ion-select formControlName="sex" interface="popover" okText="Choisir" cancelText="Fermer">
+                            <ion-select-option value="HOMME">Homme</ion-select-option>
+                            <ion-select-option value="FEMME">Femme</ion-select-option>
+                            <ion-select-option value="NON_DECLARE">Non déclaré</ion-select-option>
+                        </ion-select>
+                    </div>
+                </label>
+            </form>
+
+            <div class="profile-actions">
+                <button type="button" class="delete-button" (click)="cancel()">
+                    <ion-icon name="trash-outline"></ion-icon>
+                    Annuler les modifications
+                </button>
+                <button type="button" class="save-button" (click)="save()">
+                    <span>Enregistrer</span>
+                    <ion-icon name="checkmark-outline"></ion-icon>
+                </button>
+            </div>
+        </section>
+    </main>
+</ion-content>
+<app-bottom-nav active="profile"></app-bottom-nav>

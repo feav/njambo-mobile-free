@@ -1,0 +1,33 @@
+:host{--green:#79ff32;--green-dark:#347d12;--gold:#f4c76b;color:#fff}
+.player-profile-content{--background:#020806 url('../../assets/images/backgrounds/new-table-bg-v2.webp') center top/cover fixed no-repeat}
+.player-shell{width:min(720px,100%);min-height:100%;margin:auto;padding:16px 18px 110px;display:grid;align-content:start;gap:18px;color:#fff}
+.identity-panel{padding:26px 20px;border:1px solid rgba(153,216,80,.2);border-radius:22px;background:linear-gradient(135deg,rgba(5,22,13,.94),rgba(3,13,9,.9));box-shadow:inset 0 1px rgba(255,255,255,.035),0 18px 38px rgba(0,0,0,.3);display:grid;place-items:center;gap:12px;text-align:center}
+.avatar{width:88px;height:88px;border:2px solid var(--green);border-radius:50%;background:#15241a;display:grid;place-items:center;color:rgba(255,255,255,.55);overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.avatar.empty{border-style:dashed}
+.avatar ion-icon{font-size:2.2rem}
+.identity-panel h1{margin:0;color:#fff;font-size:1.3rem;font-weight:900}
+.member-since{color:rgba(255,255,255,.58);font-size:.65rem}
+.public-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.public-stats article{min-height:92px;padding:12px 8px;border:1px solid rgba(153,216,80,.2);border-radius:18px;background:linear-gradient(135deg,rgba(5,22,13,.94),rgba(3,13,9,.9));display:grid;place-items:center;align-content:center;gap:4px;text-align:center}.public-stats ion-icon{color:var(--gold);font-size:1.1rem}.public-stats strong{font-size:1.05rem}.public-stats span{color:rgba(255,255,255,.55);font-size:.55rem;text-transform:uppercase;letter-spacing:.04em}.campaign-badges{display:grid;gap:10px}.badge-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.badge-row article{min-height:82px;padding:10px;border:1px solid rgba(153,216,80,.2);border-radius:16px;background:rgba(3,15,9,.88);display:grid;grid-template-columns:36px 1fr;align-items:center;column-gap:8px}.badge-row img{width:34px;height:34px;object-fit:contain;grid-row:span 2}.badge-row strong{font-size:.68rem}.badge-row small{color:rgba(255,255,255,.52);font-size:.58rem}
+.list-heading{padding:2px 3px;display:flex;align-items:center;justify-content:space-between}
+.list-heading>div{display:grid;gap:3px}
+.list-heading>div>span{color:var(--green);font-size:.6rem;font-weight:900;letter-spacing:.13em;text-transform:uppercase}
+.list-heading h2{margin:0;color:#fff;font-size:1.05rem;font-weight:900}
+.list-heading button{width:40px;height:40px;border:1px solid rgba(121,255,50,.25);border-radius:13px;background:rgba(6,24,13,.78);color:var(--green);font-size:1.1rem}
+.loading{min-height:140px;display:grid;place-items:center;align-content:center;gap:10px;color:rgba(255,255,255,.5);font-size:.68rem}
+.loading ion-spinner{color:var(--green)}
+.head-to-head-profile{display:grid;gap:10px}.head-to-head-profile>.list-heading{margin:0}.head-to-head-profile>.list-heading>ion-icon{color:#99ef3e;font-size:1.3rem}.head-to-head-profile-score{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.head-to-head-profile-score article{display:grid;gap:4px;place-items:center;padding:12px 6px;border:1px solid #313b30;border-radius:16px;background:#101612;text-align:center}.head-to-head-profile-score strong{font-size:1.35rem}.head-to-head-profile-score span{font-size:.62rem;text-transform:uppercase;letter-spacing:.04em}.head-to-head-profile-score .win strong,.head-to-head-profile-score .win span{color:#99ef3e}.head-to-head-profile-score .draw strong,.head-to-head-profile-score .draw span{color:#f4c76b}.head-to-head-profile-score .loss strong,.head-to-head-profile-score .loss span{color:#ef7777}
+.games{display:grid;gap:12px}
+.games article{padding:16px;border:1px solid rgba(153,216,80,.2);border-radius:18px;background:linear-gradient(135deg,rgba(5,22,13,.94),rgba(3,13,9,.9));box-shadow:0 12px 24px rgba(0,0,0,.25);cursor:pointer;display:grid;gap:12px}
+.game-head{display:flex;justify-content:space-between;align-items:center}
+.game-type{display:flex;align-items:center;gap:6px;color:var(--green);font-size:.62rem;font-weight:900;letter-spacing:.08em}
+.status{padding:5px 8px;border:1px solid rgba(255,255,255,.1);border-radius:999px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.64);font-size:.52rem;font-weight:800}
+.status.live{border-color:rgba(121,255,50,.35);background:rgba(47,125,18,.35);color:#aaff62}
+.watch-action{min-height:42px;width:100%;border:1px solid rgba(167,255,98,.5);border-radius:13px;background:linear-gradient(180deg,#5eae24,#2d6d0e);color:#fff;display:flex;align-items:center;justify-content:center;gap:7px;font-size:.72rem;font-weight:900}
+.join-action{border-color:rgba(244,199,107,.65);background:linear-gradient(180deg,#c69529,#7c570d)}.games article>small{color:rgba(255,255,255,.58);font-size:.64rem}
+.empty-state{min-height:180px;border:1px dashed rgba(121,255,50,.2);border-radius:20px;display:grid;place-items:center;align-content:center;gap:7px;color:rgba(255,255,255,.55);text-align:center;padding:0 20px}
+.empty-state ion-icon{color:var(--gold);font-size:2.2rem}
+.empty-state strong{color:#fff}
+.empty-state span{font-size:.65rem}
+.identity-panel{background-size:cover!important;background-position:center!important}.player-guild{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1px solid #79ff3266;border-radius:999px;background:#07180ddd;color:#79ff32;text-decoration:none;font-size:.7rem;font-weight:900}
+.badge-row ion-icon{grid-row:span 2;color:var(--gold);font-size:1.4rem}

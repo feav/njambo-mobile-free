@@ -1,0 +1,46 @@
+<app-page-header title="Profil" [showAdd]="false"></app-page-header>
+<ion-content class="player-profile-content">
+  <main class="player-shell">
+    <section class="identity-panel" [style.background-image]="profile?.guild?.coverImageUrl?'linear-gradient(#02100855,#021008ee),url('+guildImage(profile?.guild?.coverImageUrl)+')':null">
+      <div class="avatar" [class.empty]="!avatarUrl">
+        <img *ngIf="avatarUrl" [src]="avatarUrl">
+        <ion-icon *ngIf="!avatarUrl" name="person"></ion-icon>
+      </div>
+      <h1>{{username}}</h1>
+      <a class="player-guild" *ngIf="profile?.guild" routerLink="/guilds"><ion-icon name="shield"></ion-icon>{{profile?.guild?.name}}</a>
+      <small class="member-since" *ngIf="memberSince()">Membre depuis le {{memberSince()|date:'longDate'}}</small>
+    </section>
+
+    <section class="public-stats" *ngIf="profile">
+      <article><ion-icon name="game-controller-outline"></ion-icon><strong>{{profile.gamesPlayed}}</strong><span>Parties jouées</span></article>
+      <article><ion-icon name="trophy-outline"></ion-icon><strong>{{profile.wins}}</strong><span>Victoires</span></article>
+      <article><ion-icon name="pie-chart-outline"></ion-icon><strong>{{winRate()}}%</strong><span>Taux de victoire</span></article>
+      <article><ion-icon name="star-outline"></ion-icon><strong>{{profile.rating}}</strong><span>Classement ELO</span></article>
+      <article><ion-icon name="ribbon-outline"></ion-icon><strong>{{profile.championshipsWon}}</strong><span>Championnats gagnés</span></article>
+      <article><ion-icon name="flag-outline"></ion-icon><strong>{{profile.badges?.length||0}}</strong><span>Badges campagne</span></article>
+    </section>
+
+    <section class="head-to-head-profile" *ngIf="profile?.headToHead">
+      <div class="list-heading"><div><span>Historique commun</span><h2>Faces-à-faces</h2></div><ion-icon name="people-outline"></ion-icon></div>
+      <div class="head-to-head-profile-score"><article class="win"><strong>{{profile.headToHead.wins}}</strong><span>Victoires</span></article><article class="draw"><strong>{{profile.headToHead.draws}}</strong><span>Nuls</span></article><article class="loss"><strong>{{profile.headToHead.losses}}</strong><span>Défaites</span></article></div>
+    </section>
+
+    <section class="campaign-badges" *ngIf="profile?.badges?.length">
+      <div class="list-heading"><div><span>Progression</span><h2>Badges de campagne</h2></div></div>
+      <div class="badge-row"><article *ngFor="let badge of profile?.badges"><ion-icon name="ribbon-outline"></ion-icon><strong>{{badge.worldName}}</strong><small>Niveau {{badge.level}} · {{badge.tierName}}</small></article></div>
+    </section>
+
+    <div class="list-heading"><div><span>En direct</span><h2>Parties en cours</h2></div><button (click)="reload()"><ion-icon name="refresh"></ion-icon></button></div>
+    <div class="loading" *ngIf="loading"><ion-spinner name="crescent"></ion-spinner><span>Chargement…</span></div>
+    <section class="games" *ngIf="!loading">
+      <article *ngFor="let game of games; trackBy: trackGame">
+        <div class="game-head"><span class="game-type"><ion-icon name="game-controller"></ion-icon>{{gameName(game.gameType)}}</span><span class="status live">{{statusLabel(game.status)}}</span></div>
+        <small>{{game.playerCount}}/{{game.requiredPlayerCount}} joueurs · {{game.stakeAmount|number:'1.0-0':'fr'}} JETONS <span *ngIf="game.accessType==='PRIVATE'">· Privée</span></small>
+        <button *ngIf="canJoin(game)" class="watch-action join-action" (click)="join(game)"><ion-icon name="enter-outline"></ion-icon> Rejoindre</button>
+        <button *ngIf="canSpectate(game)" class="watch-action" (click)="spectate(game)"><ion-icon name="eye-outline"></ion-icon> Visionner</button>
+      </article>
+      <div class="empty-state" *ngIf="!games.length"><ion-icon name="game-controller-outline"></ion-icon><strong>Aucune partie visible</strong><span>{{username}} n’a aucune partie en cours ou en attente.</span></div>
+    </section>
+  </main>
+</ion-content>
+<app-bottom-nav active="menu"></app-bottom-nav>

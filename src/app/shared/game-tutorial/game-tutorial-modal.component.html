@@ -1,0 +1,19 @@
+<ion-content class="tutorial-content">
+  <article class="tutorial-card" *ngIf="definition && slide">
+    <header><span class="eyebrow">Tutoriel · {{ definition.name }}</span><button type="button" class="close" aria-label="Fermer" (click)="close()">×</button></header>
+    <div class="tutorial-illustration" *ngIf="slide.cards?.length; else logoIllustration" [class]="'visual-' + (slide.visual || 'hand')">
+      <span class="visual-arrow" *ngIf="slide.visual === 'trick'">→</span>
+      <span *ngFor="let card of slide.cards; let cardIndex = index" class="tutorial-card-slot" [class.highlight]="cardIndex === slide.highlight || slide.highlights?.includes(cardIndex)">
+        <ng-container *ngIf="isUnoCard(card); else standardTutorialCard">
+          <span class="uno-tutorial-card" [ngClass]="unoColor(card)"><span class="uno-tutorial-corner top">{{ unoLabel(card) }}</span><span class="uno-tutorial-oval">{{ unoLabel(card) }}</span><span class="uno-tutorial-corner bottom">{{ unoLabel(card) }}</span></span>
+        </ng-container>
+        <ng-template #standardTutorialCard><img class="tutorial-real-card" [src]="cardImage(card)" [alt]="cardLabel(card) + ' de ' + familyName(card)"></ng-template>
+      </span>
+    </div>
+    <ng-template #logoIllustration><div class="tutorial-illustration" *ngIf="!imageUnavailable"><img [src]="slide.image" [alt]="slide.title" (error)="imageError()"></div></ng-template>
+    <div class="tutorial-copy"><h2>{{ slide.title }}</h2><p>{{ slide.text }}</p><p class="example" *ngIf="slide.example"><strong>Exemple :</strong> {{ slide.example }}</p></div>
+    <div class="progress">Étape {{ index + 1 }} sur {{ definition.slides.length }}</div>
+    <label class="dont-show"><input type="checkbox" [(ngModel)]="dontShowAgain"> Je ne veux plus afficher ce tutoriel</label>
+    <footer><button type="button" class="secondary" [disabled]="index === 0" (click)="previous()">Précédent</button><button type="button" class="primary" (click)="next()">{{ last ? 'Compris, jouer' : 'Suivant' }}</button></footer>
+  </article>
+</ion-content>

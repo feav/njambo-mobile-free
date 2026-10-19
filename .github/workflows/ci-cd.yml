@@ -1,0 +1,72 @@
+name: Mobile CI/CD
+
+on:
+  push:
+    branches: [main, develop, master]
+  pull_request:
+    branches: [main, develop, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: njambo-mobile-free-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: github.event_name != 'pull_request'
+    environment: ${{ github.ref_name == 'main' && 'production' || 'preproduction' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Configure environment
+        env:
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
+          GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+        run: |
+          test -n "$API_BASE_URL"
+          test -n "$GOOGLE_CLIENT_ID"
+          TARGET_FILE=${{ github.ref_name == 'main' && 'src/environments/environment.prod.ts' || 'src/environments/environment.preprod.ts' }}
+          cat > "$TARGET_FILE" <<EOF
+          export const environment = {
+            production: true,
+            apiBaseUrl: '${API_BASE_URL}',
+            googleClientId: '${GOOGLE_CLIENT_ID}'
+          };
+          EOF
+          cat "$TARGET_FILE"
+      - name: Build application
+        run: npm run ${{ github.ref_name == 'main' && 'build:production' || 'build:preproduction' }}
+      - name: Verify production API target
+        if: github.ref_name == 'main'
+        run: node scripts/verify-api-target.mjs production
+      - name: Select target
+        id: target
+        run: |
+          if [ "$GITHUB_REF_NAME" = "main" ]; then
+            echo "host=${{ secrets.PROD_SSH_HOST }}" >> "$GITHUB_OUTPUT"
+            echo "password=${{ secrets.PROD_SSH_PASSWORD }}" >> "$GITHUB_OUTPUT"
+            echo "path=/var/www/njambo/game" >> "$GITHUB_OUTPUT"
+          else
+            echo "host=${{ secrets.PREPROD_SSH_HOST }}" >> "$GITHUB_OUTPUT"
+            echo "password=${{ secrets.PREPROD_SSH_PASSWORD }}" >> "$GITHUB_OUTPUT"
+            echo "path=/opt/bet-ai/html/mobile/fafap-app" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Deploy atomically
+        env:
+          SSHPASS: ${{ steps.target.outputs.password }}
+          HOST: ${{ steps.target.outputs.host }}
+          TARGET: ${{ steps.target.outputs.path }}
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq sshpass
+          tar -C www -czf njambo-mobile.tar.gz .
+          sshpass -e scp -o StrictHostKeyChecking=accept-new njambo-mobile.tar.gz "root@$HOST:/tmp/njambo-mobile.tar.gz"
+          sshpass -e ssh -o StrictHostKeyChecking=accept-new "root@$HOST" "set -e; mkdir -p '$TARGET.next'; find '$TARGET.next' -mindepth 1 -delete; tar -xzf /tmp/njambo-mobile.tar.gz -C '$TARGET.next'; rm -rf '$TARGET.previous'; if [ -d '$TARGET' ]; then mv '$TARGET' '$TARGET.previous'; fi; mv '$TARGET.next' '$TARGET'"

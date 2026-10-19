@@ -1,0 +1,25 @@
+<ion-footer class="bottom-nav">
+    <a routerLink="/home" routerDirection="root" [replaceUrl]="true" [class.active]="active === 'home'">
+        <i class="fas fa-home"></i>
+        <span>Accueil</span>
+    </a>
+    <a routerLink="/profile" routerDirection="root" [replaceUrl]="true" [class.active]="active === 'profile'">
+        <i class="fas fa-user"></i>
+        <span>Profil</span>
+    </a>
+    <a routerLink="/search" routerDirection="root" [replaceUrl]="true" [class.active]="active === 'game'">
+        <span class="poker-nav-icon" aria-hidden="true">
+            <span class="poker-card poker-card--back"></span>
+            <span class="poker-card poker-card--front">♠</span>
+        </span>
+        <span>Jeu</span>
+    </a>
+    <a routerLink="/transactions" routerDirection="root" [replaceUrl]="true" [class.active]="active === 'transactions'">
+        <i class="fas fa-coins"></i>
+        <span>Transactions</span>
+    </a>
+    <button type="button" [class.active]="active === 'menu'" (click)="openMenu()">
+        <i class="fas fa-bars"></i>
+        <span>Menu</span>
+    </button>
+</ion-footer>

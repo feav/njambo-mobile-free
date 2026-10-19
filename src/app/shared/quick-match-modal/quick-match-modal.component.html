@@ -1,0 +1,42 @@
+<ion-content class="quick-match-content">
+  <div class="modal-shell">
+    <button class="modal-close" type="button" aria-label="Fermer" (click)="close()"><ion-icon name="close-outline"></ion-icon></button>
+    <div class="handle"></div>
+
+    <ng-container *ngIf="phase === 'picking'">
+      <span class="modal-kicker">NJAMBO · MATCHMAKING</span>
+      <h1>Jouer maintenant</h1>
+      <p class="intro">Choisis tes critères, on te trouve une table disponible.</p>
+
+      <div class="criteria-panel">
+        <div class="criteria-heading"><ion-icon name="options-outline"></ion-icon><strong>TES CRITÈRES DE JEU</strong></div>
+        <div class="criteria-grid">
+          <label class="select-field"><span><ion-icon name="layers-outline"></ion-icon>Jeu</span><select [value]="selectedGameType" (change)="selectGameType($any($event.target).value)"><option *ngFor="let option of gameTypes" [value]="option.type">{{ option.label }}</option></select></label>
+          <label class="select-field"><span><ion-icon name="people-outline"></ion-icon>Joueurs max.</span><select [value]="selectedPlayerCount" (change)="selectPlayerCount(+$any($event.target).value)"><option *ngFor="let count of playerCounts" [value]="count" [disabled]="selectedGameType === 'COCHON_GRATTE' && count === 2">{{ count }} joueurs max.</option></select></label>
+          <label class="select-field"><span><ion-icon name="cash-outline"></ion-icon>Mise maximale</span><select [value]="selectedStake" (change)="selectStake(+$any($event.target).value)"><option *ngFor="let tier of stakeTiers" [value]="tier">{{ tier === 0 ? 'Gratuite' : (tier + ' F') }}</option></select></label>
+        </div>
+      </div>
+
+      <button type="button" class="search-button" (click)="startSearch()">
+        <ion-icon name="search-outline"></ion-icon>
+        <span>Rechercher une partie</span>
+        <ion-icon class="search-arrow" name="arrow-forward-outline"></ion-icon>
+      </button>
+      <div class="or-divider"><span></span><b>OU</b><span></span></div>
+      <div class="quick-links">
+        <button type="button" class="quick-link tournament-link" (click)="goTo('/championships')"><ion-icon name="trophy-outline"></ion-icon><strong>Tournois</strong><small>Affronte les meilleurs joueurs et gagne des récompenses !</small><ion-icon class="link-arrow" name="arrow-forward-outline"></ion-icon></button>
+        <button type="button" class="quick-link campaign-link" (click)="goTo('/campaign')"><ion-icon name="hardware-chip-outline"></ion-icon><strong>Jouer avec ordinateur</strong><small>Entraîne-toi contre notre IA et améliore ton niveau !</small><ion-icon class="link-arrow" name="arrow-forward-outline"></ion-icon></button>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="phase === 'searching'">
+      <div class="searching-state">
+        <div class="search-spinner"><ion-icon name="game-controller-outline"></ion-icon></div>
+        <h1>Recherche d’une table…</h1>
+        <p class="intro">On cherche une table {{ selectedGameLabel }} de {{ selectedPlayerCount }} joueurs maximum, jusqu’à {{ selectedStake === 0 ? 'une mise gratuite' : (selectedStake + ' JETONS maximum') }}. Si aucune table n’est trouvée après 10 minutes, ta partie est créée automatiquement puis tu es redirigé vers le jeu.</p>
+        <p class="creation-error" *ngIf="creationError" role="status">{{ creationError }}</p>
+        <button type="button" class="secondary-button" (click)="close()">Annuler</button>
+      </div>
+    </ng-container>
+  </div>
+</ion-content>

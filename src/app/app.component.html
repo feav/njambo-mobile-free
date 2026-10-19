@@ -1,0 +1,60 @@
+<ion-app>
+    <ion-menu side="start" menuId="main-menu" contentId="main" [swipeGesture]="true">
+        <ion-content>
+            <div class="menu-shell">
+                <div class="menu-topbar">
+                    <span>Mon espace</span>
+                    <button type="button" aria-label="Fermer le menu" (click)="closeMenu()">
+                        <ion-icon name="close-outline"></ion-icon>
+                    </button>
+                </div>
+                <div class="menu-hero">
+                    <img class="menu-avatar" [src]="avatarUrl" [alt]="'Avatar de ' + username">
+                    <div class="profile-copy">
+                        <small>Bienvenue,</small>
+                        <h2>{{ username }}</h2>
+                        <span class="vip-badge"><i class="fas fa-shield-alt"></i> Joueur Njambo</span>
+                    </div>
+                </div>
+                <div class="menu-balance">
+                    <span>Solde disponible</span>
+                    <strong>{{ balance | number:'1.0-2':'fr' }} <img src="../../assets/icon/jeton.png" alt="Jetons"></strong>
+                </div>
+                <div class="menu-section-title">Navigation</div>
+                <ion-menu-toggle auto-hide="true">
+                    <div class="menu-list">
+                        <ion-item
+                            lines="none"
+                            detail="false"
+                            *ngFor="let p of pages; let i = index"
+                            routerDirection="root"
+                            [replaceUrl]="true"
+                            [routerLink]="[p.route]"
+                            routerLinkActive="selected">
+                            <i slot="start" [class]="p.icon"></i>
+                            <ion-label>{{ p.title }}</ion-label>
+                            <ion-icon slot="end" name="chevron-forward-outline"></ion-icon>
+                        </ion-item>
+                    </div>
+                </ion-menu-toggle>
+                <div class="menu-tutorial-actions" *ngIf="currentTutorialType">
+                    <button type="button" (click)="reviewCurrentTutorial(); closeMenu()"><ion-icon name="book-outline"></ion-icon><span>Revoir le tutoriel</span></button>
+                </div>
+                <div class="menu-tutorial-actions">
+                    <button type="button" (click)="reactivateTutorials(); closeMenu()"><ion-icon name="refresh-outline"></ion-icon><span>Réactiver tous les tutoriels</span></button>
+                </div>
+                <button type="button" class="menu-logout" (click)="onLogout()">
+                    <ion-icon name="log-out-outline"></ion-icon>
+                    <span>Déconnexion</span>
+                </button>
+                <div class="menu-footer">
+                    <span>Njambo · Jeux de cartes</span>
+                    <small>v{{ appVersion }} · {{ commitHash }}</small>
+                </div>
+            </div>
+        </ion-content>
+    </ion-menu>
+    <!-- Disable swipe-to-go-back because it's poor UX to combine STGB with side menus -->
+    <ion-router-outlet id="main" [swipeGesture]="false"></ion-router-outlet>
+    <a *ngIf="showFacebookSupport" class="global-facebook-support" [href]="facebookSupportLink" target="_blank" rel="noopener" aria-label="Ouvrir la page Facebook de Njambo"><ion-icon name="logo-facebook"></ion-icon></a>
+</ion-app>

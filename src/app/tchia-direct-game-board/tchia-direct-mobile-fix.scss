@@ -1,0 +1,63 @@
+@media (max-width: 700px) {
+  .tchia-fafap-shell {
+    overflow: visible;
+  }
+
+  .tchia-fafap-shell .game-area {
+    min-height: calc(100vh - 360px) !important;
+    overflow: visible !important;
+  }
+
+  .tchia-fafap-shell .player-zone {
+    position: fixed !important;
+    left: 5px;
+    right: 5px;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 6px);
+    z-index: 40 !important;
+    box-sizing: border-box;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 8px 9px calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+    border: 1px solid rgba(244, 199, 107, .3) !important;
+    border-radius: 18px;
+    background: rgba(7, 16, 12, .97) !important;
+    box-shadow: 0 -8px 28px rgba(0, 0, 0, .45) !important;
+    transform: none !important;
+  }
+
+  .tchia-fafap-shell .player-zone-heading {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    min-height: 18px;
+    transform: none !important;
+    flex-direction: row !important;
+    justify-content: center;
+  }
+
+  .tchia-fafap-shell .player-zone-heading strong {
+    display: block !important;
+  }
+
+  .tchia-fafap-shell .hand-row {
+    min-height: 100px !important;
+    transform: none !important;
+  }
+
+  .tchia-fafap-shell .hand-row .hand-sum-bubble {
+    top: 50% !important;
+    left: 4px !important;
+    bottom: auto !important;
+    transform: translateY(-50%) !important;
+  }
+
+  .tchia-fafap-shell .hand-row .hand-cards {
+    min-height: 86px !important;
+    padding-top: 2px !important;
+  }
+
+  .tchia-fafap-shell .actions {
+    min-height: 40px;
+    margin-top: 2px !important;
+  }
+}

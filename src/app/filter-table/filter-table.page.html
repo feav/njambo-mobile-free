@@ -1,0 +1,68 @@
+<ion-content scrollY="false">
+    <div class="header">
+        <h6 class="title">FILTRER LES TABLES</h6>
+        <ion-button color="tertiary" fill="clear" (click)="dismiss()">
+            <ion-icon slot="icon-only" name="close-circle-outline"></ion-icon>
+        </ion-button>
+    </div>
+    <div class="body">
+        <ion-grid>
+            <ion-row class="ion-align-items-center">
+                <ion-col>
+                    <ion-label>Mise minimale :</ion-label>
+                </ion-col>
+                <ion-col>
+                    <ion-input [(ngModel)]="minimumStake" type="text"></ion-input>
+                </ion-col>
+            </ion-row>
+            <ion-row class="ion-align-items-center">
+                <ion-col>
+                    <ion-label>Mise maximale :</ion-label>
+                </ion-col>
+                <ion-col>
+                    <ion-input [(ngModel)]="maximumStake" type="text"></ion-input>
+                </ion-col>
+            </ion-row>
+            <ion-row class="ion-align-items-center">
+                <ion-col>
+                    <ion-label>Simple Kora :</ion-label>
+                </ion-col>
+                <ion-col>
+                    <ion-toggle [(ngModel)]="simpleKora"></ion-toggle>
+                </ion-col>
+            </ion-row>
+            <ion-row class="ion-align-items-center">
+                <ion-col>
+                    <ion-label>Double Kora :</ion-label>
+                </ion-col>
+                <ion-col>
+                    <ion-toggle [(ngModel)]="doubleKora"></ion-toggle>
+                </ion-col>
+            </ion-row>
+            <ion-row class="ion-align-items-center">
+                <ion-col>
+                    <ion-label>Triple Kora :</ion-label>
+                </ion-col>
+                <ion-col>
+                    <ion-toggle [(ngModel)]="tripleKora"></ion-toggle>
+                </ion-col>
+            </ion-row>
+            <ion-row class="ion-align-items-center">
+                <ion-col>
+                    <ion-label>Début :</ion-label>
+                </ion-col>
+                <ion-col>
+                    <ion-select [(ngModel)]="debut" okText="Choisir" cancelText="Fermer">
+                        <ion-select-option value="10">10 Min</ion-select-option>
+                        <ion-select-option value="30">30 Min</ion-select-option>
+                        <ion-select-option value="60">1 H</ion-select-option>
+                    </ion-select>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+    </div>
+    <div class="footer">
+        <fapfap-button class="cancel" label="Réinitialiser" background="danger" (click)="reset()" ></fapfap-button>
+        <fapfap-button class="validate" label="Filtrer" background="tertiary" (click)="filter()" ></fapfap-button>
+    </div>
+</ion-content>

@@ -1,0 +1,40 @@
+<ion-content><main class="check-board">
+  <header>
+    <button routerLink="/search" aria-label="Retour aux parties">‹</button>
+    <div>
+      <small>NJAMBO · TCHECK GAME</small>
+      <strong>Table {{metadata?.gameId?.slice(0,8)?.toUpperCase()}}</strong>
+    </div>
+    <button type="button" class="mode-switch" *ngIf="!spectating&&state" [class.enabled]="displayAutomaticMode" [disabled]="busy" (click)="automation()">
+      <span>{{displayAutomaticMode?'Auto':'Manuel'}}</span>
+      <i></i>
+    </button>
+    <span *ngIf="spectating" class="spectator-badge">
+      <ion-icon name="eye-outline"></ion-icon> {{spectatorCount}}
+    </span>
+    <span *ngIf="!spectating" [class.live]="state?.status==='IN_PROGRESS'">{{statusLabel(state?.status)}}</span>
+  </header>
+  <div class="spectator-banner" *ngIf="spectating">
+    <ion-icon name="eye-outline"></ion-icon> Vous regardez en spectateur</div>
+  <app-game-table-tools *ngIf="state" [gameId]="state.gameId" [players]="state.players" [currentPlayerId]="state.currentPlayerId" [meGamePlayerId]="state.meGamePlayerId" [deadline]="state.currentTurnDeadline" [status]="state.status" [lobbyEnabled]="true"></app-game-table-tools>
+  <app-game-stake-info *ngIf="state" [gameId]="state.gameId"></app-game-stake-info>
+  <div class="tcheck-callout" *ngIf="tcheckCallout" [class.games]="calloutWord==='GAMES'" [class.penalty]="calloutWord==='+2'||calloutWord==='+4'" aria-live="assertive">
+    <strong>{{calloutWord}} !</strong>
+    <span>{{tcheckCallout}}</span>
+  </div>
+  <div class="special-card-popup" *ngIf="specialCardPopup" aria-hidden="true"><img [src]="specialCardPopup" alt=""></div>
+  <section class="table" [style.--fly-x]="flightX" [style.--fly-y]="flightY" *ngIf="state&&(state.status==='IN_PROGRESS'||state.status==='SETTLING'||state.status==='FINISHED')" (click)="clearSelection()">
+    <div class="command-orb-wrap" *ngIf="activeSuit as suit" [class.suit-changed]="suitJustChanged" aria-hidden="true">
+      <i class="command-orb-shadow"></i>
+      <i class="command-orb" [class.red]="suit==='COEUR'||suit==='BISCUIT'">{{suitSymbol(suit)}}</i>
+    </div>
+    <div class="board-turn-timer" *ngIf="state.status==='IN_PROGRESS'" [class.timer-warning]="turnProgress<=50&&turnProgress>25" [class.timer-danger]="turnProgress<=25" [style.--turn-progress]="turnProgress+'turn'" aria-label="Temps restant"><small>SEC</small><strong>{{turnSeconds}}</strong></div>
+    <article class="opponent" *ngFor="let player of opponents;let i=index;trackBy:trackPlayer" [ngStyle]="playerStyle(i,opponents.length)" [class.current]="player.current"><div class="avatar" appPlayerProfile [appPlayerProfile]="{userId: player.userId, username: player.username, avatarUrl: player.avatarUrl, countryCode: player.countryCode}" [ngClass]="playerColor(player.seatNumber)"><img [src]="player.avatarUrl" [alt]="player.username"><span class="seat-index">{{player.seatNumber}}</span><span class="turn-badge" *ngIf="player.current" role="img" aria-label="Ce joueur doit jouer" title="Ce joueur doit jouer"><i class="fas fa-hand-paper" aria-hidden="true"></i></span></div><div class="player-name"><b>{{player.username}}</b><app-player-badges [userId]="player.userId" [countryCode]="player.countryCode"></app-player-badges></div><div class="opponent-hand" [class.moving]="movingPlayerId===player.gamePlayerId"><img *ngFor="let ignored of visibleBacks(player);let cardIndex=index" [src]="backImage" [style.--back-index]="cardIndex" [style.transform]="'translateX('+(cardIndex*8)+'px) rotate('+(cardIndex*4-7)+'deg)'" alt="Dos de carte"><em *ngIf="extraCards(player)">+{{extraCards(player)}}</em></div></article>
+    <div class="center" [class.your-turn]="myTurn"><div class="suit-watermark" *ngIf="state.commandedSuit" [class.red]="state.commandedSuit==='COEUR'||state.commandedSuit==='BISCUIT'" [class.suit-changed]="suitJustChanged" aria-hidden="true">{{suitSymbol(state.commandedSuit)}}</div><div class="status"><span *ngIf="state.commandedSuit">{{suitSymbol(state.commandedSuit)}} {{suitName(state.commandedSuit)}} commandé</span><span class="penalty" *ngIf="state.pendingPenalty">Pénalité +{{state.pendingPenalty}}</span><span *ngIf="!state.commandedSuit&&!state.pendingPenalty">{{myTurn?'À vous de jouer':'Tour en cours'}}</span></div><button class="deck" [class.suggest-draw]="canDraw" (click)="draw()" [disabled]="!canDraw||busy"><img [src]="backImage" alt="Pioche"><small>{{state.drawPileCount}} cartes</small></button><div class="draw-hint" *ngIf="canDraw" role="status" aria-live="polite">{{hasPlayableCard?'Jouer ou':'Aucune carte jouable'}}<b>Piochez</b></div><div class="discard-cards" aria-label="Trois dernières cartes jouées"><div class="top-card" *ngFor="let card of recentCards;let i=index;trackBy:trackCard" [style.--discard-index]="i" [class.latest]="i===recentCards.length-1" [class.moving-card]="card.id===movingCardId" [class.from-me]="card.id===movingCardId&&cardMovement==='from-me'" [class.from-opponent]="card.id===movingCardId&&cardMovement==='from-opponent'"><img [src]="cardImage(card)" [alt]="cardLabel(card)"></div></div></div>
+    <div class="me" [class.current]="myTurn" *ngIf="!spectating"><div class="avatar" appPlayerProfile [appPlayerProfile]="{userId: me?.userId || '', username: me?.username, avatarUrl: me?.avatarUrl, countryCode: me?.countryCode}" [ngClass]="meColorClass"><img [src]="me?.avatarUrl" [alt]="me?.username||'Joueur'"><span class="seat-index" *ngIf="me">{{me.seatNumber}}</span><span class="turn-badge" *ngIf="myTurn" role="img" aria-label="À vous de jouer" title="À vous de jouer"><i class="fas fa-hand-paper" aria-hidden="true"></i></span></div><div class="player-name"><b>{{me?.username}}</b><app-player-badges [userId]="me?.userId" [countryCode]="me?.countryCode"></app-player-badges></div></div>
+    <div class="hand"><button *ngFor="let card of compactHand;let i=index;trackBy:trackCard" [style.--card-index]="i" [style.transform]="getHandCardTransform(i,compactHand.length)" [class.selected]="isSelected(card)" [class.playable]="myTurn&&playable(card)" [class.blocked]="myTurn&&!playable(card)" [attr.aria-label]="cardLabel(card)" (click)="$event.stopPropagation();toggle(card)"><img [src]="cardImage(card)" [alt]="cardLabel(card)"></button><button class="hand-extra" *ngIf="extraCardCount" (click)="$event.stopPropagation();handOpen=true" [attr.aria-label]="'Afficher les '+state.hand.length+' cartes de votre main'"><strong>+{{extraCardCount}}</strong><small>VOIR TOUT</small></button></div>
+  </section>
+  <div class="hand-modal-backdrop" *ngIf="handOpen&&state" (click)="handOpen=false"><section class="hand-modal" (click)="$event.stopPropagation()"><header><div><small>VOTRE MAIN</small><strong>{{state.hand.length}} cartes</strong></div><button type="button" (click)="handOpen=false" aria-label="Fermer">×</button></header><p>{{myTurn?'Sélectionnez une carte puis touchez-la à nouveau pour la jouer.':'Vous pourrez jouer une carte à votre tour.'}}</p><div class="full-hand"><button *ngFor="let card of state.hand;trackBy:trackCard" [class.selected]="isSelected(card)" [class.playable]="myTurn&&playable(card)" [class.blocked]="myTurn&&!playable(card)" [attr.aria-label]="cardLabel(card)" (click)="toggle(card)"><img [src]="cardImage(card)" [alt]="cardLabel(card)"></button></div></section></div>
+  <div class="suit-picker" *ngIf="choosing"><section><strong>Commander une famille</strong><p>Le prochain joueur devra respecter votre choix.</p><div><button (click)="choose('MACABO')">♠<small>Macabo</small></button><button (click)="choose('ARACHIDE')">♣<small>Arachide</small></button><button class="red" (click)="choose('COEUR')">♥<small>Cœur</small></button><button class="red" (click)="choose('BISCUIT')">♦<small>Biscuit</small></button></div><button class="cancel" (click)="choosing=undefined">Annuler</button></section></div>
+  <p class="message" *ngIf="message">{{message}}</p>
+</main></ion-content>

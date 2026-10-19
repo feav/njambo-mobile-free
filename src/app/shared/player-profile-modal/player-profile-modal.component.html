@@ -1,0 +1,27 @@
+<ion-content class="profile-modal-content">
+  <div class="modal-shell">
+    <button class="modal-close" type="button" aria-label="Fermer" (click)="close()"><ion-icon name="close-outline"></ion-icon></button>
+    <div class="handle"></div><h1>PROFIL DU JOUEUR</h1>
+    <section class="profile-hero" [style.background-image]="profile.guild?.coverImageUrl?'linear-gradient(#03100866,#031008ee),url('+guildImage(profile.guild.coverImageUrl)+')':null">
+      <div class="profile-avatar"><img [src]="profile.avatarUrl" [alt]="profile.username"></div>
+      <h2>{{profile.username}}</h2>
+      <a class="player-guild" *ngIf="profile.guild" [routerLink]="['/guilds']" (click)="close()"><ion-icon name="shield"></ion-icon>{{profile.guild.name}}</a>
+      <p class="country" *ngIf="profile.countryCode">{{flag(profile.countryCode)}} <span>{{profile.countryCode}}</span></p>
+      <p class="joined">Inscrit le {{profile.registeredAt|date:'d MMMM yyyy':'':'fr-FR'}}</p>
+    </section>
+    <section class="status-card"><div class="status-icon"><ion-icon [name]="isEducationalBot?'hardware-chip-outline':'shield-checkmark'"></ion-icon></div><div><strong>{{isEducationalBot?'COACH ÉDUCATIF':'JOUEUR ACTIF'}}</strong><p>{{isEducationalBot?'Disponible pour les niveaux de campagne.':'Participe régulièrement aux parties.'}}</p></div><div class="rank"><span>RANG ACTUEL</span><b>{{rankLabel}}</b></div><ion-icon name="chevron-forward-outline"></ion-icon></section>
+    <section class="stats-grid">
+      <div><ion-icon name="trophy"></ion-icon><strong>{{profile.rating}}</strong><span>ELO</span><small>Classement actuel</small></div>
+      <div><ion-icon name="albums"></ion-icon><strong>{{profile.gamesPlayed}}</strong><span>PARTIES</span><small>Total jouées</small></div><div><ion-icon name="medal"></ion-icon><strong>{{profile.championshipsWon||0}}</strong><span>CHAMPIONNATS</span><small>Gagnés</small></div>
+      <div><ion-icon name="trophy-outline"></ion-icon><strong>{{winRate}}%</strong><span>VICTOIRES</span><small>{{profile.wins}} victoires</small></div>
+      <div class="loss"><ion-icon name="heart-dislike"></ion-icon><strong>{{lossRate}}%</strong><span>DÉFAITES</span><small>{{profile.losses}} défaites</small></div>
+    </section>
+    <section class="head-to-head" *ngIf="profile.headToHead">
+      <div class="section-title"><div><h3>VOS FACES-À-FACES</h3><small>Parties terminées ensemble</small></div><ion-icon name="people-outline"></ion-icon></div>
+      <div class="head-to-head-score"><div class="h2-win"><strong>{{profile.headToHead.wins}}</strong><span>VICTOIRES</span></div><div class="h2-draw"><strong>{{profile.headToHead.draws}}</strong><span>NULS</span></div><div class="h2-loss"><strong>{{profile.headToHead.losses}}</strong><span>DÉFAITES</span></div></div>
+    </section>
+    <section class="badges"><div class="section-title"><div><h3>BADGES DE CAMPAGNE</h3><small>{{profile.badges?.length||0}} niveau(x) terminé(s)</small></div><strong>★ {{badgeStars}}</strong></div><div class="campaign-badge-list" *ngIf="campaignBadges.length;else noBadge"><article *ngFor="let campaign of campaignBadges"><header><div><b>{{campaign.name}}</b><small>Niveau {{campaign.badge.level}} atteint · {{campaign.completed}} niveau(x) terminé(s)</small></div><span>★ {{campaign.stars}}</span></header><div class="badge-list"><div class="badge"><img [src]="badgeUrl(campaign.badge.levelId)" [alt]="campaign.badge.tierName"><b>Niveau {{campaign.badge.level}}</b><span>{{campaign.badge.tierName}}</span><small>{{'★★★★★'.slice(0,campaign.badge.stars)}}</small></div></div></article></div></section>
+    <ng-template #noBadge><p class="empty-badge">Aucun badge obtenu pour le moment.</p></ng-template>
+    <div class="profile-actions"><ng-container *ngIf="!isEducationalBot"><ion-button *ngIf="canAdd" expand="block" class="add-button" (click)="addFriend()" [disabled]="busy"><ion-icon name="person-add-outline" slot="start"></ion-icon>{{busy?'Envoi…':'AJOUTER COMME AMI'}}</ion-button><ion-button *ngIf="!canAdd" expand="block" fill="outline" class="add-button existing" disabled><ion-icon name="people-outline" slot="start"></ion-icon>{{profile.friendshipStatus==='ACCEPTED'?'VOUS ÊTES AMIS':profile.friendshipStatus==='PENDING'?'DEMANDE ENVOYÉE':'VOTRE PROFIL'}}</ion-button></ng-container><ion-button expand="block" fill="outline" class="message-button" (click)="openProfile()"><ion-icon name="person-circle-outline" slot="start"></ion-icon>OUVRIR LE PROFIL</ion-button></div>
+  </div>
+</ion-content>

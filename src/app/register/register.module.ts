@@ -1,0 +1,23 @@
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
+import { IonicModule } from '@ionic/angular';
+import { FapfapButtonModule } from '../fapfap-button/fapfap-button.module';
+
+import { RegisterPageRoutingModule } from './register-routing.module';
+
+import { RegisterPage } from './register.page';
+
+@NgModule({
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    IonicModule,
+    FapfapButtonModule,
+    RegisterPageRoutingModule
+  ],
+  declarations: [RegisterPage]
+})
+export class RegisterPageModule {}

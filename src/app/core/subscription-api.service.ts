@@ -1,0 +1,4 @@
+import {Injectable} from '@angular/core';import {HttpClient} from '@angular/common/http';import {environment} from '../../environments/environment';import {Observable} from 'rxjs';
+export interface SubscriptionPlan{ id:string; serviceKey:string; code:string; name:string; tier:string; price:number; frequencyDays:number; dailyQuota:number|null; active:boolean }
+export interface UserSubscription{ id:string; planId:string; status:string; nextChargeAt:string }
+@Injectable({providedIn:'root'}) export class SubscriptionApiService{private url=`${environment.apiBaseUrl}/api/subscriptions`;constructor(private http:HttpClient){}plans():Observable<SubscriptionPlan[]>{return this.http.get<SubscriptionPlan[]>(`${this.url}/plans`)}mine():Observable<UserSubscription[]>{return this.http.get<UserSubscription[]>(`${this.url}/mine`)}subscribe(planId:string){return this.http.post<UserSubscription>(`${this.url}/subscribe`,{planId})}}

@@ -1,0 +1,134 @@
+<app-page-header title="Aide & Support"></app-page-header>
+
+<ion-content fullscreen="true">
+    <div class="help-shell">
+        <section class="hero-card">
+            <div class="hero-visual">
+                <img src="assets/images/help-headset.png" alt="Casque du support Njambo">
+            </div>
+            <div class="hero-copy">
+                <h2>Bonjour Armel !</h2>
+                <p>Notre équipe est là pour vous aider.<br>Choisissez la meilleure façon de nous contacter.</p>
+            </div>
+            <ion-icon class="hero-chat-icon" name="chatbubble-ellipses-outline"></ion-icon>
+        </section>
+
+        <section class="section-title">Contactez-nous</section>
+        <section class="contact-grid">
+            <article class="contact-card">
+                <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+                <h3>Chat en direct</h3>
+                <p>Réponse instantanée, disponible 7j/7.</p>
+                <button type="button" (click)="startChat()">Démarrer le chat</button>
+            </article>
+            <article class="contact-card">
+                <ion-icon name="mail-outline"></ion-icon>
+                <h3>Email</h3>
+                <p>contact@njambo.fr</p>
+                <a href="mailto:contact@njambo.fr?subject=Demande%20d'assistance">Envoyer un email</a>
+            </article>
+            <article class="contact-card">
+                <ion-icon name="call-outline"></ion-icon>
+                <h3>Téléphone</h3>
+                <p>+33 6 46 92 29 21 · 7j/7</p>
+                <a href="https://wa.me/33646922921" target="_blank" rel="noopener">WhatsApp</a>
+            </article>
+            <article class="contact-card">
+                <ion-icon name="logo-facebook"></ion-icon>
+                <h3>Facebook</h3>
+                <p>Retrouve Njambo sur Facebook.</p>
+                <a href="https://www.facebook.com/1265920616601740" target="_blank" rel="noopener">Ouvrir Facebook</a>
+            </article>
+        </section>
+
+        <section class="section-title">Questions fréquentes</section>
+        <section class="faq-list">
+            <button type="button" class="faq-item" [class.open]="expandedFaq === 0" (click)="toggleFaq(0)" [attr.aria-expanded]="expandedFaq === 0">
+                <div>
+                    <h3>Crédits et recharges</h3>
+                    <p *ngIf="expandedFaq === 0">Utilise le formulaire pour déposer une demande avec horodatage et statut. Tu peux aussi consulter la page Transactions pour suivre ton solde.</p>
+                </div>
+                <ion-icon [name]="expandedFaq === 0 ? 'chevron-up' : 'chevron-down'"></ion-icon>
+            </button>
+            <button type="button" class="faq-item" [class.open]="expandedFaq === 1" (click)="toggleFaq(1)" [attr.aria-expanded]="expandedFaq === 1">
+                <div>
+                    <h3>Partenariats</h3>
+                    <p *ngIf="expandedFaq === 1">Écris à contact@njambo.fr en indiquant « Partenariat » dans le sujet de ta demande.</p>
+                </div>
+                <ion-icon [name]="expandedFaq === 1 ? 'chevron-up' : 'chevron-down'"></ion-icon>
+            </button>
+            <button type="button" class="faq-item" [class.open]="expandedFaq === 2" (click)="toggleFaq(2)" [attr.aria-expanded]="expandedFaq === 2">
+                <div>
+                    <h3>Informations générales</h3>
+                    <p *ngIf="expandedFaq === 2">Notre support répond 7j/7 par chat. L’assistance téléphonique est disponible du lundi au vendredi, de 10h à 19h.</p>
+                </div>
+                <ion-icon [name]="expandedFaq === 2 ? 'chevron-up' : 'chevron-down'"></ion-icon>
+            </button>
+            <button type="button" class="faq-item" [class.open]="expandedFaq === 3" (click)="toggleFaq(3)" [attr.aria-expanded]="expandedFaq === 3">
+                <div>
+                    <h3>Assistance technique</h3>
+                    <p *ngIf="expandedFaq === 3">Indique l’écran concerné, l’heure du problème et le message affiché. Une capture d’écran permettra un traitement plus rapide.</p>
+                </div>
+                <ion-icon [name]="expandedFaq === 3 ? 'chevron-up' : 'chevron-down'"></ion-icon>
+            </button>
+        </section>
+
+        <section class="section-title">Formulaire de contact</section>
+        <section class="form-card">
+            <div class="contact-meta">
+                <div>
+                    <span>Adresse</span>
+                    <strong>Support Njambo · Réponse par email ou WhatsApp</strong>
+                </div>
+                <div>
+                    <span>Partenariats</span>
+                    <strong>contact@njambo.fr</strong>
+                </div>
+            </div>
+
+            <form [formGroup]="contactForm" (ngSubmit)="submit()">
+                <div class="item-container">
+                    <ion-item lines="none">
+                        <ion-label>Nom & prénom</ion-label>
+                        <ion-input formControlName="fullName" type="text" placeholder="Ton nom"></ion-input>
+                    </ion-item>
+                </div>
+                <small class="field-error" *ngIf="isInvalid('fullName')">Indique ton nom complet.</small>
+                <div class="item-container">
+                    <ion-item lines="none">
+                        <ion-label>Email</ion-label>
+                        <ion-input formControlName="email" type="email" placeholder="ton@email.com"></ion-input>
+                    </ion-item>
+                </div>
+                <small class="field-error" *ngIf="isInvalid('email')">Saisis une adresse email valide.</small>
+                <div class="item-container">
+                    <ion-item lines="none">
+                        <ion-label>Téléphone</ion-label>
+                        <ion-input formControlName="phone" type="tel" placeholder="+237 ..."></ion-input>
+                    </ion-item>
+                </div>
+                <div class="item-container">
+                    <ion-item lines="none">
+                        <ion-label>Sujet</ion-label>
+                        <ion-input formControlName="subject" type="text" placeholder="Recharge de crédit, partenariat..."></ion-input>
+                    </ion-item>
+                </div>
+                <small class="field-error" *ngIf="isInvalid('subject')">Le sujet doit contenir au moins 3 caractères.</small>
+                <div class="item-container textarea">
+                    <ion-item lines="none">
+                        <ion-label>Message</ion-label>
+                        <ion-textarea formControlName="message" autoGrow="true" rows="5" placeholder="Décris ta demande"></ion-textarea>
+                    </ion-item>
+                </div>
+                <small class="field-error" *ngIf="isInvalid('message')">Le message doit contenir au moins 10 caractères.</small>
+                <div class="status-note">
+                    Le message sera enregistré avec l’horodatage et un statut <strong>En attente</strong>.
+                </div>
+                <button type="submit" [disabled]="isSubmitting || contactForm.invalid">
+                    {{ isSubmitting ? 'Envoi...' : 'Envoyer la demande' }}
+                </button>
+            </form>
+        </section>
+    </div>
+</ion-content>
+<app-bottom-nav active="menu"></app-bottom-nav>

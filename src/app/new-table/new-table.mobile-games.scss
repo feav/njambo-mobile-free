@@ -1,0 +1,43 @@
+@media (max-width: 600px) {
+  .game-stage .game-type-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .game-stage .game-type-grid button {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .game-stage .game-art {
+    inset: 0 !important;
+    height: 100% !important;
+  }
+
+  .game-stage .game-type-grid .game-copy {
+    position: absolute;
+    z-index: 4;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: auto;
+    min-height: 38px;
+    padding: 18px 5px 5px !important;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(180deg, transparent, rgba(0, 0, 0, .94) 45%);
+  }
+
+  .game-stage .game-copy > strong {
+    display: block !important;
+    color: #fff !important;
+    font-size: clamp(.66rem, 3.2vw, .88rem) !important;
+    line-height: 1.08;
+    text-shadow: 0 2px 5px #000;
+  }
+
+  .game-stage .game-copy > small,
+  .game-stage .game-copy > span,
+  .game-stage .game-copy > em { display: none !important; }
+}

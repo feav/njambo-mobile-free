@@ -1,0 +1,22 @@
+.stake-info{
+  display:flex;
+  gap:4px;
+  padding:5px 7px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;
+  background:rgba(0,0,0,.58);
+  backdrop-filter:blur(6px);
+  pointer-events:none;
+  white-space:nowrap;
+}
+.stake-info-item{
+  display:grid;
+  gap:1px;
+  min-width:0;
+  padding:0 6px;
+  text-align:center;
+  border-right:1px solid rgba(255,255,255,.12);
+  &:last-child{border-right:0}
+  small{color:rgba(255,255,255,.55);font-size:.56rem;text-transform:uppercase;letter-spacing:.06em}
+  strong{color:#fff;font-size:.7rem;white-space:nowrap}
+}

@@ -1,0 +1,92 @@
+<app-page-header title="Paramètres"></app-page-header>
+
+<ion-content fullscreen="true">
+    <main class="settings-shell">
+        <section class="settings-intro">
+            <div><span>Préférences</span><h1>Personnalise ton expérience</h1><p>Configure tes parties, l’affichage et les notifications.</p></div>
+            <ion-icon name="options-outline"></ion-icon>
+        </section>
+
+        <section class="settings-card">
+            <div class="section-heading">
+                <span class="section-icon"><i class="fas fa-dice"></i></span>
+                <div><small>Gameplay</small><h2>Préférences de jeu</h2></div>
+            </div>
+            <div class="settings-grid">
+                <label class="number-setting">
+                    <span><strong>Mise minimale</strong><small>Montant minimum proposé</small></span>
+                    <div><ion-input [(ngModel)]="minimumStake" type="number"></ion-input><img src="../../assets/icon/jeton.png" alt="Jetons"></div>
+                </label>
+                <label class="number-setting">
+                    <span><strong>Mise maximale</strong><small>Montant maximum proposé</small></span>
+                    <div><ion-input [(ngModel)]="maximumStake" type="number"></ion-input><img src="../../assets/icon/jeton.png" alt="Jetons"></div>
+                </label>
+                <label class="toggle-setting">
+                    <span><strong>Simple Kora</strong><small>Afficher ce mode dans la recherche</small></span>
+                    <ion-toggle [(ngModel)]="simpleKora"></ion-toggle>
+                </label>
+                <label class="toggle-setting">
+                    <span><strong>Double Kora</strong><small>Afficher ce mode dans la recherche</small></span>
+                    <ion-toggle [(ngModel)]="doubleKora"></ion-toggle>
+                </label>
+                <label class="toggle-setting">
+                    <span><strong>Triple Kora</strong><small>Afficher ce mode dans la recherche</small></span>
+                    <ion-toggle [(ngModel)]="tripleKora"></ion-toggle>
+                </label>
+            </div>
+        </section>
+
+        <section class="settings-card">
+            <div class="section-heading">
+                <span class="section-icon"><ion-icon name="phone-portrait-outline"></ion-icon></span>
+                <div><small>Application</small><h2>Affichage et alertes</h2></div>
+            </div>
+            <div class="settings-grid">
+                <div class="card-theme-setting">
+                    <span><strong>Jeu de cartes</strong><small>Choisis le design utilisé dans FapFap, Président (Trou du cul) et Cochon Gratté.</small></span>
+                    <div class="card-theme-options">
+                        <button type="button" [class.selected]="cardTheme==='normal'" (click)="cardTheme='normal'"><img src="assets/images/card-themes/normal/AS.webp" alt="Carte normale"><b>Normal</b><i *ngIf="cardTheme==='normal'">✓</i></button>
+                        <button type="button" [class.selected]="cardTheme==='gold'" (click)="cardTheme='gold'"><img src="assets/images/card-themes/gold/AS.webp" alt="Carte Gold"><b>Gold</b><i *ngIf="cardTheme==='gold'">✓</i></button>
+                    </div>
+                </div>
+                <label class="toggle-setting">
+                    <span><strong>Mode sombre</strong><small>Utiliser le thème sombre de Njambo</small></span>
+                    <ion-toggle [(ngModel)]="darkMode"></ion-toggle>
+                </label>
+                <label class="toggle-setting">
+                    <span><strong>Notifications navigateur</strong><small>Joueurs qui rejoignent votre table et démarrage de la partie</small></span>
+                    <ion-toggle [(ngModel)]="notifications"></ion-toggle>
+                </label>
+                <label class="toggle-setting">
+                    <span><strong>Effets sonores</strong><small>Sons des cartes et des actions</small></span>
+                    <ion-icon class="setting-volume-icon" name="volume-high-outline" aria-hidden="true"></ion-icon>
+                    <ion-toggle [(ngModel)]="soundEnabled"></ion-toggle>
+                </label>
+                <label class="toggle-setting">
+                    <span><strong>Musique d’ambiance</strong><small>Boucle douce pendant la partie</small></span>
+                    <ion-icon class="setting-volume-icon" name="musical-notes-outline" aria-hidden="true"></ion-icon>
+                    <ion-toggle [(ngModel)]="musicEnabled"></ion-toggle>
+                </label>
+                <label class="toggle-setting">
+                    <span><strong>Mode automatique</strong><small>Trie automatiquement tes cartes</small></span>
+                    <ion-icon class="setting-volume-icon" name="shuffle-outline" aria-hidden="true"></ion-icon>
+                    <ion-toggle [(ngModel)]="autoSortEnabled"></ion-toggle>
+                </label>
+                <label class="select-setting">
+                    <span><strong>Langue</strong><small>Langue de l’interface</small></span>
+                    <ion-select [(ngModel)]="language" interface="popover" okText="Choisir" cancelText="Fermer">
+                        <ion-select-option value="fr">Français</ion-select-option>
+                        <ion-select-option value="en">English</ion-select-option>
+                    </ion-select>
+                </label>
+            </div>
+        </section>
+
+        <div class="settings-actions">
+            <button type="button" class="reset-button" (click)="resetSettings()"><ion-icon name="refresh-outline"></ion-icon>Réinitialiser</button>
+            <button type="button" class="save-button" (click)="saveSettings()" [disabled]="saving"><span>{{saving?'Enregistrement…':'Enregistrer'}}</span><ion-icon [name]="saving?'sync-outline':'checkmark-outline'"></ion-icon></button>
+        </div>
+    </main>
+</ion-content>
+
+<app-bottom-nav active="menu"></app-bottom-nav>

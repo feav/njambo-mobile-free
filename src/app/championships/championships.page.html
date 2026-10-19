@@ -1,0 +1,140 @@
+<app-page-header title="Championnats" [showAdd]="false"></app-page-header>
+<ion-content class="championship-content">
+  <main class="champ-shell">
+    <section class="hero-panel">
+      <div class="hero-copy">
+        <span class="eyebrow"><ion-icon name="trophy"></ion-icon> Tournois Njambo</span>
+        <h1>Entre dans la légende</h1>
+        <p>Affronte chaque adversaire au meilleur des trois et progresse jusqu’à la finale.</p>
+        <div class="hero-rules">
+          <span><ion-icon name="people"></ion-icon> Duels à 2</span>
+          <span><ion-icon name="shield-checkmark"></ion-icon> Jetons protégés</span>
+          <span><ion-icon name="flash"></ion-icon> 2 victoires</span>
+        </div>
+      </div>
+      <button class="hero-action" (click)="creating=!creating">
+        <ion-icon [name]="creating?'close':'add'"></ion-icon>
+        <span>{{creating?'Fermer':'Créer'}}</span>
+      </button>
+    </section>
+
+    <section class="invitations-panel" *ngIf="invitations.length">
+      <header class="section-heading">
+        <div class="heading-icon"><ion-icon name="mail-open"></ion-icon></div>
+        <div><span>Invitations</span><h2>Championnats en attente de ta réponse</h2></div>
+      </header>
+      <article class="invitation-card" *ngFor="let invitation of invitations; trackBy: trackInvitation">
+        <div><strong>{{invitation.championshipName}}</strong><span>{{gameName(invitation.gameType)}} · Participation {{invitation.entryFee|number:'1.0-0'}} JETONS</span></div>
+        <div class="invitation-actions">
+          <button class="decline-action" [disabled]="invitationBusy" (click)="declineInvitation(invitation,$event)">Refuser</button>
+          <button class="accept-action" [disabled]="invitationBusy" (click)="acceptInvitation(invitation,$event)">Accepter</button>
+        </div>
+      </article>
+    </section>
+
+    <section class="creation-panel" *ngIf="creating">
+      <header class="section-heading">
+        <div class="heading-icon"><ion-icon name="trophy"></ion-icon></div>
+        <div><span>Nouvelle compétition</span><h2>Configure ton championnat</h2><p>La table technique sera choisie automatiquement.</p></div>
+      </header>
+
+      <label class="field-card name-field">
+        <span><ion-icon name="create-outline"></ion-icon> Nom du championnat</span>
+        <ion-input [(ngModel)]="form.name" placeholder="Ex. Coupe des champions"></ion-input>
+      </label>
+
+      <div class="config-block">
+        <div class="config-title"><span>Choisis le jeu</span><small>Chaque rencontre se joue à deux</small></div>
+        <div class="game-grid">
+          <button [class.active]="form.gameType==='FAFAP'" (click)="form.gameType='FAFAP'"><ion-icon name="diamond"></ion-icon><strong>FapFap</strong></button>
+          <button [class.active]="form.gameType==='UNO'" (click)="form.gameType='UNO'"><ion-icon name="color-palette"></ion-icon><strong>UNO</strong></button>
+          <button [class.active]="form.gameType==='PRESIDENT'" (click)="form.gameType='PRESIDENT'"><ion-icon name="layers"></ion-icon><strong>Président (Trou du cul)</strong></button>
+          <button [class.active]="form.gameType==='COCHON_GRATTE'" (click)="form.gameType='COCHON_GRATTE'"><ion-icon name="paw"></ion-icon><strong>Cochon</strong></button>
+          <button [class.active]="form.gameType==='CHECK_GAMES'" (click)="form.gameType='CHECK_GAMES'"><ion-icon name="color-wand"></ion-icon><strong>Tcheck Game</strong></button>
+        </div>
+      </div>
+
+      <div class="config-block">
+        <div class="config-title"><span>Taille du tableau</span><small>Choisis le nombre de niveaux</small></div>
+        <div class="level-grid">
+          <button [class.active]="form.levels===1" (click)="form.levels=1"><strong>2</strong><span>joueurs</span><small>Finale</small></button>
+          <button [class.active]="form.levels===2" (click)="form.levels=2"><strong>4</strong><span>joueurs</span><small>Demi-finale</small></button>
+          <button [class.active]="form.levels===3" (click)="form.levels=3"><strong>8</strong><span>joueurs</span><small>Quart de finale</small></button>
+          <button [class.active]="form.levels===4" (click)="form.levels=4"><strong>16</strong><span>joueurs</span><small>4 niveaux</small></button>
+          <button [class.active]="form.levels===5" (click)="form.levels=5"><strong>32</strong><span>joueurs</span><small>5 niveaux</small></button>
+          <button [class.active]="form.levels===6" (click)="form.levels=6"><strong>64</strong><span>joueurs</span><small>6 niveaux</small></button>
+        </div>
+      </div>
+
+      <div class="config-block">
+        <div class="config-title"><span>Format du duel</span><small>Nombre de manches par match</small></div>
+        <div class="level-grid">
+          <button [class.active]="form.bestOf===1" (click)="form.bestOf=1"><strong>1</strong><span>manche</span><small>Manche sèche</small></button>
+          <button [class.active]="form.bestOf===3" (click)="form.bestOf=3"><strong>3</strong><span>manches</span><small>2 victoires</small></button>
+          <button [class.active]="form.bestOf===5" (click)="form.bestOf=5"><strong>5</strong><span>manches</span><small>3 victoires</small></button>
+        </div>
+      </div>
+
+      <div class="entry-row">
+        <label class="field-card stake-field">
+          <span><ion-icon name="cash-outline"></ion-icon> Participation initiale</span>
+          <div><ion-input type="number" min="1" [(ngModel)]="form.entryFee"></ion-input><b>F</b></div>
+        </label>
+        <div class="entry-preview"><span>Participants</span><strong>{{participants}}</strong><small>{{form.levels}} niveau{{form.levels>1?'x':''}}</small></div>
+      </div>
+
+      <label class="field-card duration-field">
+        <span><ion-icon name="timer-outline"></ion-icon> Durée maximale de lancement</span>
+        <div><ion-input type="number" min="10" max="1440" step="5" name="durationMinutes" [(ngModel)]="form.durationMinutes"></ion-input><b>minutes</b></div>
+        <small>60 minutes par défaut · environ {{form.durationMinutes / form.levels | number:'1.0-0'}} min par niveau</small>
+      </label>
+
+      <div class="config-block">
+        <div class="config-title"><span>Quand démarrer ?</span><small>Choisis le mode de lancement</small></div>
+        <div class="game-grid">
+          <button [class.active]="form.startMode==='IMMEDIATE'" (click)="form.startMode='IMMEDIATE'"><ion-icon name="flash-outline"></ion-icon><strong>Dès que complet</strong></button>
+          <button [class.active]="form.startMode==='SCHEDULED'" (click)="form.startMode='SCHEDULED'"><ion-icon name="calendar-outline"></ion-icon><strong>À une date fixée</strong></button>
+        </div>
+        <label class="field-card name-field" *ngIf="form.startMode==='SCHEDULED'">
+          <span><ion-icon name="time-outline"></ion-icon> Date et heure de départ (heure de Paris)</span>
+          <input class="scheduled-date-input" type="datetime-local" name="scheduledStartAt" [(ngModel)]="form.scheduledStartAt" [min]="minScheduledStart" required>
+        </label>
+        <small class="scheduled-hint" *ngIf="form.startMode==='SCHEDULED'">L’heure indiquée correspond au fuseau de Paris. Si toutes les places ne sont pas prises à cette date, le championnat est annulé et chaque participant est remboursé.</small>
+      </div>
+
+      <div class="pot-summary">
+        <div><span>Récompense totale</span><strong>{{participants * (form.entryFee || 0) | number:'1.0-0'}} JETONS</strong><small>{{participants}} joueurs × {{form.entryFee || 0 | number:'1.0-0'}} JETONS</small></div>
+        <span><ion-icon name="trophy"></ion-icon><b>Le champion reçoit la récompense</b></span>
+        <span><ion-icon name="ribbon"></ion-icon><b>Le second reçoit une récompense</b></span>
+      </div>
+
+      <button class="create-action" (click)="create()" [disabled]="busy||form.entryFee<=0||form.durationMinutes<10||form.durationMinutes>1440||!form.name.trim()||scheduledInvalid">
+        <ion-spinner *ngIf="busy" name="crescent"></ion-spinner>
+        <ion-icon *ngIf="!busy" name="trophy"></ion-icon>
+        <span>{{busy?'Création…':'Créer le championnat'}}</span>
+        <ion-icon *ngIf="!busy" name="arrow-forward"></ion-icon>
+      </button>
+    </section>
+
+    <div class="list-heading"><div><span>Compétitions</span><h2>Championnats disponibles</h2></div><button (click)="reload()"><ion-icon name="refresh"></ion-icon></button></div>
+    <nav class="championship-tabs" aria-label="Filtrer les championnats">
+      <button [class.active]="activeTab==='waiting'" (click)="activeTab='waiting'"><span>En attente</span><b>{{tabCount('waiting')}}</b></button>
+      <button [class.active]="activeTab==='current'" (click)="activeTab='current'"><span>En cours</span><b>{{tabCount('current')}}</b></button>
+      <button [class.active]="activeTab==='past'" (click)="activeTab='past'"><span>Terminé</span><b>{{tabCount('past')}}</b></button>
+    </nav>
+    <div class="loading" *ngIf="loading"><ion-spinner name="crescent"></ion-spinner><span>Chargement des championnats…</span></div>
+    <section class="cards" *ngIf="!loading">
+      <article *ngFor="let item of filteredItems; trackBy: trackChampionship" (click)="open(item)">
+        <div class="card-head"><span class="game"><ion-icon name="game-controller"></ion-icon>{{gameName(item.gameType)}}</span><span class="status" [class.live]="item.status==='IN_PROGRESS'">{{item.status==='REGISTRATION'?'Inscriptions':item.status==='IN_PROGRESS'?'En cours':item.status==='FINISHED'?'Terminé':'Annulé'}}</span></div>
+        <h2>{{item.name}}</h2>
+        <div class="numbers"><span><small>Participation</small><strong>{{item.entryFee|number:'1.0-0'}} JETONS</strong></span><span><small>Participants</small><strong>{{item.joinedParticipants}} / {{item.requiredParticipants}}</strong></span><span><small>Format</small><strong>{{item.bestOf}} manche{{item.bestOf>1?'s':''}}</strong></span><span><small>Récompense du champion</small><strong>{{estimatedChampionGain(item)|number:'1.0-0'}} JETONS</strong><em>Finaliste : {{estimatedFinalistGain(item)|number:'1.0-0'}} JETONS</em></span></div>
+        <div class="progress"><i [style.width.%]="item.joinedParticipants/item.requiredParticipants*100"></i></div>
+        <div class="scheduled-badge" *ngIf="item.startMode==='SCHEDULED'&&item.status==='REGISTRATION'"><ion-icon name="calendar-outline"></ion-icon><span>Démarre le {{formattedParisStart(item)}} (heure de Paris)</span><strong>{{countdown(item)}}</strong></div>
+        <button *ngIf="item.status==='REGISTRATION'&&!item.joined" (click)="join(item,$event)" [disabled]="busy"><ion-icon name="enter-outline"></ion-icon> Participer</button>
+        <button class="joined" *ngIf="item.joined"><ion-icon name="checkmark-circle"></ion-icon>{{item.status==='REGISTRATION'?'Inscrit':'Voir mon parcours'}}</button>
+      </article>
+      <div class="empty-state" *ngIf="!filteredItems.length"><ion-icon name="trophy-outline"></ion-icon><strong>Aucun championnat dans cette catégorie</strong><span>Choisis un autre onglet ou crée une nouvelle compétition.</span></div>
+    </section>
+  </main>
+</ion-content>
+<app-bottom-nav active="home"></app-bottom-nav>

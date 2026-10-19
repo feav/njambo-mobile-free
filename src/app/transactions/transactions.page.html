@@ -1,0 +1,173 @@
+<app-page-header title="Transactions"></app-page-header>
+
+<ion-content fullscreen="true">
+    <main class="transactions-shell">
+        <section class="balance-card">
+            <div class="balance-copy">
+                <span>Jetons disponibles <ion-icon name="eye-outline"></ion-icon></span>
+                <strong *ngIf="!loading && balance !== null; else balanceLoading">{{ balance | number:'1.0-2':'fr' }} <span class="token-label">JETONS</span></strong>
+                <ng-template #balanceLoading><ion-skeleton-text class="balance-skeleton" [animated]="true"></ion-skeleton-text></ng-template>
+                <small *ngIf="!loading && reservedBalance">{{ reservedBalance | number:'1.0-2':'fr' }} jetons engagés</small>
+            </div>
+        </section>
+
+        <section class="money-actions">
+            <button type="button" class="deposit-action" (click)="moneyAction('deposit')">
+                <ion-icon name="arrow-up-outline"></ion-icon>
+                <span><strong>Ajouter des jetons</strong><small>Alimenter ton compte</small></span>
+            </button>
+            <button type="button" class="withdraw-action" (click)="moneyAction('refund')">
+                <ion-icon name="arrow-down-outline"></ion-icon>
+                <span><strong>Demander un remboursement</strong><small>Traitement manuel par l’équipe</small></span>
+            </button>
+        </section>
+
+        <section class="request-panel" *ngIf="paymentRequests.length">
+            <h2>Demandes récentes</h2>
+            <article *ngFor="let request of paymentRequests.slice(0,5); trackBy: trackPaymentRequest">
+                <div><strong>{{request.type==='DEPOSIT'?'Ajout de jetons':'Remboursement'}} · {{methodLabel(request.method)}}</strong><small>{{request.createdAt|date:'dd/MM/yyyy HH:mm'}}</small></div>
+                <b>{{request.amount|number:'1.0-2':'fr'}} jetons</b><span [attr.data-status]="request.status">{{request.status==='PENDING'?'En attente':request.status==='APPROVED'?'Validée':'Rejetée'}}</span>
+                <p class="rejection-reason" *ngIf="request.status==='REJECTED'">
+                    <strong>Motif du rejet :</strong>
+                    {{request.adminNote || 'Aucun motif n’a été communiqué.'}}
+                </p>
+                <p class="admin-note" *ngIf="request.status!=='REJECTED' && request.adminNote">{{request.adminNote}}</p>
+            </article>
+        </section>
+
+        <section class="history-panel">
+            <div class="filter-row">
+                <button type="button" [class.active]="activeFilter === 'all'" (click)="setFilter('all')">
+                    <ion-icon name="sync-outline"></ion-icon><span>Tout</span>
+                </button>
+                <button type="button" [class.active]="activeFilter === 'deposit'" (click)="setFilter('deposit')">
+                    <ion-icon class="green" name="arrow-up-circle"></ion-icon><span>Ajouts</span>
+                </button>
+                <button type="button">
+                    <ion-icon name="calendar-outline"></ion-icon><span>Période</span>
+                </button>
+            </div>
+
+            <div class="history-loading" *ngIf="loading" aria-label="Chargement des transactions">
+                <article class="history-item skeleton-item" *ngFor="let item of [1,2,3]">
+                    <ion-skeleton-text class="skeleton-circle" [animated]="true"></ion-skeleton-text>
+                    <div class="skeleton-copy">
+                        <ion-skeleton-text [animated]="true"></ion-skeleton-text>
+                        <ion-skeleton-text [animated]="true"></ion-skeleton-text>
+                    </div>
+                    <ion-skeleton-text class="skeleton-amount" [animated]="true"></ion-skeleton-text>
+                </article>
+            </div>
+            <div class="history-group" *ngFor="let group of filteredGroups; trackBy: trackTransactionGroup">
+                <div class="group-heading">
+                    <span>{{ group.label }}</span>
+                    <div>
+                        <strong class="positive" *ngIf="group.positive">+{{ group.positive }}</strong>
+                        <strong class="negative" *ngIf="group.negative">-{{ group.negative }}</strong>
+                    </div>
+                </div>
+                <article class="history-item" *ngFor="let transaction of group.items; trackBy: trackTransaction" [class]="transaction.type">
+                    <div class="transaction-icon">
+                        <ion-icon [name]="transaction.type === 'withdraw' ? 'arrow-down-outline' : 'arrow-up-outline'"></ion-icon>
+                    </div>
+                    <div class="transaction-copy">
+                        <h3>{{ transaction.title }}</h3>
+                        <p>{{ transaction.reference }}</p>
+                    </div>
+                    <time>{{ transaction.time }}</time>
+                    <strong class="amount" [class.positive]="transaction.type === 'deposit'" [class.negative]="transaction.type === 'withdraw'">
+                        {{ transaction.type === 'deposit' ? '+' : '-' }}{{ transaction.amount }}
+                        <img src="../../assets/icon/jeton.png" alt="Jetons">
+                    </strong>
+                    <ion-icon class="chevron" name="chevron-forward-outline"></ion-icon>
+                </article>
+            </div>
+            <app-empty-state *ngIf="!loading && !loadFailed && filteredGroups.length === 0"
+                icon="receipt-outline"
+                title="Aucune transaction"
+                message="Aucun mouvement ne correspond au filtre sélectionné.">
+            </app-empty-state>
+            <app-empty-state *ngIf="!loading && loadFailed"
+                icon="cloud-offline-outline"
+                title="Données indisponibles"
+                message="Les informations du compte n’ont pas pu être chargées. Réessayez dans quelques instants.">
+            </app-empty-state>
+        </section>
+    </main>
+</ion-content>
+
+<div class="payment-backdrop" *ngIf="paymentMode" (click)="closePayment()">
+    <section class="payment-modal" (click)="$event.stopPropagation()">
+        <button class="payment-close" type="button" (click)="closePayment()">×</button>
+        <ng-container *ngIf="paymentMode==='refund'">
+            <small>DEMANDE MANUELLE</small>
+            <h2>Demander un remboursement</h2>
+            <p class="payment-help">Ta demande sera examinée manuellement. Aucun remboursement n’est automatique : tu recevras une confirmation après validation ou rejet.</p>
+            <label>Nombre de jetons concerné
+                <input type="number" min="1" [max]="balance || undefined" step="1" [(ngModel)]="paymentAmount" placeholder="Ex. 500">
+            </label>
+            <div class="available-balance">
+                <span>Jetons disponibles</span>
+                <strong>{{balance | number:'1.0-2':'fr'}} JETONS</strong>
+            </div>
+            <div class="method-picker">
+                <button *ngFor="let method of availableMethods('refund'); trackBy: trackPaymentMethod" type="button" [class.active]="paymentMethod===method" (click)="selectMethod(method)">{{methodLabel(method)}}</button>
+            </div>
+            <label>{{destinationLabel()}}<input [(ngModel)]="paymentDestination" [type]="paymentMethod==='PAYPAL'?'email':'text'" [placeholder]="destinationPlaceholder()"></label>
+            <button class="payment-submit" type="button" [disabled]="paymentBusy || !refundSubmitEnabled" (click)="submitPayment()">{{paymentBusy?'Envoi…':'Envoyer la demande'}}</button>
+        </ng-container>
+        <ng-container *ngIf="paymentMode==='deposit'">
+            <div class="deposit-steps">
+                <span [class.active]="depositStep>=1">1. Montant</span>
+                <span [class.active]="depositStep>=2">2. Moyen</span>
+                <span [class.active]="depositStep>=3">3. Transfert</span>
+            </div>
+
+            <ng-container *ngIf="depositStep===1">
+                <p class="payment-help">Indique le nombre de jetons que tu souhaites ajouter à ton compte.</p>
+                <label>Nombre de jetons
+                    <input type="number" min="1" step="1" [(ngModel)]="paymentAmount" placeholder="Ex. 500">
+                </label>
+                <button class="payment-submit" type="button" [disabled]="!paymentAmountValid" (click)="nextDepositStep()">Continuer</button>
+            </ng-container>
+
+            <ng-container *ngIf="depositStep===2">
+                <p class="payment-help">Choisissez votre moyen de paiement.</p>
+                <div class="method-picker">
+                    <button *ngFor="let method of availableMethods(); trackBy: trackPaymentMethod" type="button" [class.active]="paymentMethod===method" (click)="selectMethod(method)">{{methodLabel(method)}}</button>
+                </div>
+                <button class="payment-back" type="button" (click)="backDepositStep()">← Retour</button>
+            </ng-container>
+
+            <ng-container *ngIf="depositStep===3">
+                <div class="payment-instruction" *ngIf="paymentMethod==='PAYPAL'">
+                    <span>Ajoute les jetons avec ce compte PayPal</span>
+                    <strong>{{paymentAccount()}}</strong>
+                    <p>Une fois l’opération effectuée, ajoute la référence ci-dessous.</p>
+                </div>
+                <div class="payment-instruction" *ngIf="paymentMethod==='BANK_TRANSFER'">
+                    <span>Ajoute les jetons avec ce compte bancaire</span>
+                    <strong>{{paymentAccount()}}</strong>
+                    <p>Une fois l’opération effectuée, ajoute la référence ci-dessous.</p>
+                </div>
+                <div class="payment-instruction ussd" *ngIf="paymentMethod==='MOBILE_MONEY' || paymentMethod==='ORANGE_MONEY'">
+                    <span>Utilise {{methodLabel(paymentMethod)}} pour ajouter tes jetons</span>
+                    <a class="ussd-dial" [href]="ussdDialLink()">{{ussdCode()}}</a>
+                    <p>Une fois l’opération effectuée, ajoute la référence ci-dessous.</p>
+                </div>
+                <label>Référence du transfert<input [(ngModel)]="payerReference" maxlength="160" placeholder="ID ou nom de l’envoi"></label>
+                <p class="payment-help">Ton compte sera crédité dans les brefs délais.</p>
+                <button class="payment-submit" type="button" [disabled]="paymentBusy || !depositSubmitEnabled" (click)="submitPayment()">{{paymentBusy?'Enregistrement…':'Confirmer la demande'}}</button>
+                <button class="payment-back" type="button" (click)="backDepositStep()">← Retour</button>
+            </ng-container>
+        </ng-container>
+    </section>
+
+    <div class="support-bubbles">
+        <a class="support-bubble whatsapp" [href]="supportWhatsappLink" target="_blank" rel="noopener" aria-label="Contactez-nous sur WhatsApp">
+            <ion-icon name="logo-whatsapp"></ion-icon>
+        </a>
+    </div>
+</div>
+
+<app-bottom-nav active="transactions"></app-bottom-nav>

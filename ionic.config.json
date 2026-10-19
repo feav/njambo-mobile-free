@@ -1,0 +1,7 @@
+{
+  "name": "Njambo",
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "angular"
+}

@@ -1,0 +1,31 @@
+<ion-content>
+  <app-page-header title="Abonnements" [showAdd]="false"></app-page-header>
+  <main>
+    <div class="heading">
+      <div><h1>Choisissez votre formule</h1><p>Une seule formule pour profiter pleinement de Njambo.</p></div>
+      <div class="trust"><span>✓</span><div><b>Sans engagement</b><small>Annulation à tout moment</small></div></div>
+    </div>
+
+    <section class="plans">
+      <article *ngFor="let p of plans" [class.recommended]="p.tier==='PREMIUM'" [class.current]="active(p)" [class.ultra]="p.tier==='ULTRA'">
+        <div *ngIf="p.tier==='PREMIUM'" class="ribbon">RECOMMANDÉ</div>
+        <div class="orb" [class.gold]="p.tier!=='BASIC'"><span>{{icon(p.tier)}}</span></div>
+        <span class="tier">{{p.tier}}</span>
+        <h2>{{p.name}}</h2>
+        <div class="feature"><b>MOUVEMENTS AUTOMATIQUES</b><span>{{movement(p.tier)}}</span></div>
+        <div class="feature"><b>PARTIES AMICALES</b><strong>{{quotaLabel(p)}}</strong></div>
+        <div class="price"><strong>{{p.price|number:'1.0-0':'fr'}} JETONS</strong><small>/ {{p.frequencyDays}} jours</small></div>
+        <button (click)="buy(p)" [disabled]="active(p)||busy===p.id">{{active(p)?'FORMULE ACTIVE':busy===p.id?'ACTIVATION…':'S’ABONNER'}}</button>
+      </article>
+    </section>
+
+    <section class="comparison"><h2>Comparaison des formules</h2>
+      <div class="compare-row header"><span>FONCTIONNALITÉS</span><span>BASIC</span><span>PREMIUM</span><span>ULTRA</span></div>
+      <div class="compare-row"><span>Mouvements automatiques</span><span>Basique</span><span>Intelligents</span><span>Intelligents</span></div>
+      <div class="compare-row"><span>Parties amicales</span><span>10 / jour</span><span>100 / jour</span><span>Illimitées</span></div>
+      <div class="compare-row"><span>Activation</span><span>✓</span><span>✓</span><span>✓</span></div>
+    </section>
+    <div class="tagline"><b>PLUS TU JOUES, <em>PLUS TU GAGNES !</em></b><span>Améliore tes performances avec la formule adaptée à ton style.</span></div>
+  </main>
+</ion-content>
+<app-bottom-nav active="menu"></app-bottom-nav>
