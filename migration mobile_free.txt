@@ -16,11 +16,11 @@ Historique des commits de migration
   dans l’index et la configuration de déploiement.
 - 9807ad6 : recherche automatique limitée à 10 secondes avant création d’une
   nouvelle partie.
-- Correction suivante : le popup de recherche rapide utilise « points de jeu »
-  pour présenter les paliers, afin de ne pas donner l’impression d’une monnaie.
-  Le palier technique par défaut reste 25 ; pour rendre toutes les parties
-  gratuites, il faudra décider explicitement de forcer selectedStake à 0 et de
-  masquer les autres paliers.
+- Correction suivante : le popup de recherche rapide utilise « JETONS » pour
+  présenter les paliers, sans suffixe F/CFA ni symbole monétaire. Le palier
+  technique par défaut reste 25 ; pour rendre toutes les parties gratuites,
+  il faudra décider explicitement de forcer selectedStake à 0 et de masquer
+  les autres paliers.
 
 Composants fonctionnels adaptés
 -------------------------------
@@ -83,9 +83,8 @@ Composants fonctionnels adaptés
      texte indique 10 secondes et utilise JETONS maximum.
    - Le polling reste à 4 secondes. Après 10 secondes sans table compatible,
      quickCreate est appelé automatiquement.
-   - Les paliers du popup sont affichés comme « points de jeu ». Le palier
-     initial actuel est 25 points de jeu et « Partie gratuite » reste
-     disponible.
+   - Les paliers du popup sont affichés comme « JETONS ». Le palier initial
+     actuel est 25 JETONS et « Partie gratuite » reste disponible.
 
 Règles de conversion à appliquer lors d’une nouvelle migration
 ----------------------------------------------------------------
