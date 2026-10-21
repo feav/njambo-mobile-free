@@ -13,7 +13,7 @@
         <div class="criteria-grid">
           <label class="select-field"><span><ion-icon name="layers-outline"></ion-icon>Jeu</span><select [value]="selectedGameType" (change)="selectGameType($any($event.target).value)"><option *ngFor="let option of gameTypes" [value]="option.type">{{ option.label }}</option></select></label>
           <label class="select-field"><span><ion-icon name="people-outline"></ion-icon>Joueurs max.</span><select [value]="selectedPlayerCount" (change)="selectPlayerCount(+$any($event.target).value)"><option *ngFor="let count of playerCounts" [value]="count" [disabled]="selectedGameType === 'COCHON_GRATTE' && count === 2">{{ count }} joueurs max.</option></select></label>
-          <label class="select-field"><span><ion-icon name="cash-outline"></ion-icon>Mise maximale</span><select [value]="selectedStake" (change)="selectStake(+$any($event.target).value)"><option *ngFor="let tier of stakeTiers" [value]="tier">{{ tier === 0 ? 'Gratuite' : (tier + ' F') }}</option></select></label>
+          <label class="select-field"><span><ion-icon name="game-controller-outline"></ion-icon>Niveau d’entrée</span><select [value]="selectedStake" (change)="selectStake(+$any($event.target).value)"><option *ngFor="let tier of stakeTiers" [value]="tier">{{ tier === 0 ? 'Partie gratuite' : (tier + ' points de jeu') }}</option></select></label>
         </div>
       </div>
 
@@ -33,7 +33,7 @@
       <div class="searching-state">
         <div class="search-spinner"><ion-icon name="game-controller-outline"></ion-icon></div>
         <h1>Recherche d’une table…</h1>
-        <p class="intro">On cherche une table {{ selectedGameLabel }} de {{ selectedPlayerCount }} joueurs maximum, jusqu’à {{ selectedStake === 0 ? 'une mise gratuite' : (selectedStake + ' JETONS maximum') }}. Si aucune table n’est trouvée après 10 secondes, ta partie est créée automatiquement puis tu es redirigé vers le jeu.</p>
+        <p class="intro">On cherche une table {{ selectedGameLabel }} de {{ selectedPlayerCount }} joueurs maximum, jusqu’à {{ selectedStake === 0 ? 'une partie gratuite' : (selectedStake + ' points de jeu maximum') }}. Si aucune table n’est trouvée après 10 secondes, ta partie est créée automatiquement puis tu es redirigé vers le jeu.</p>
         <p class="creation-error" *ngIf="creationError" role="status">{{ creationError }}</p>
         <button type="button" class="secondary-button" (click)="close()">Annuler</button>
       </div>
