@@ -33,7 +33,7 @@
       <div class="searching-state">
         <div class="search-spinner"><ion-icon name="game-controller-outline"></ion-icon></div>
         <h1>Recherche d’une table…</h1>
-        <p class="intro">On cherche une table {{ selectedGameLabel }} de {{ selectedPlayerCount }} joueurs maximum, jusqu’à {{ selectedStake === 0 ? 'une mise gratuite' : (selectedStake + ' JETONS maximum') }}. Si aucune table n’est trouvée après 10 minutes, ta partie est créée automatiquement puis tu es redirigé vers le jeu.</p>
+        <p class="intro">On cherche une table {{ selectedGameLabel }} de {{ selectedPlayerCount }} joueurs maximum, jusqu’à {{ selectedStake === 0 ? 'une mise gratuite' : (selectedStake + ' JETONS maximum') }}. Si aucune table n’est trouvée après 10 secondes, ta partie est créée automatiquement puis tu es redirigé vers le jeu.</p>
         <p class="creation-error" *ngIf="creationError" role="status">{{ creationError }}</p>
         <button type="button" class="secondary-button" (click)="close()">Annuler</button>
       </div>

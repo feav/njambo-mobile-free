@@ -39,7 +39,7 @@ export class QuickMatchModalComponent implements OnDestroy {
     phase: Phase = 'picking';
     creationError = '';
 
-    private readonly searchTimeoutMs = 10 * 60 * 1000;
+    private readonly searchTimeoutMs = 10 * 1000;
     private readonly pollIntervalMs = 4000;
     private readonly preferencesKey = 'njambo.quick-match.preferences.v3';
     private pollTimer?: ReturnType<typeof setInterval>;
