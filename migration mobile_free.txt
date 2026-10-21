@@ -1,0 +1,111 @@
+MIGRATION NJAMBO MOBILE -> NJAMBO MOBILE FREE
+===============================================
+
+Objectif
+--------
+Créer une version gratuite de l’application sur https://game.njambo.fr/.
+Le code reste basé sur l’application mobile principale, mais l’affichage et le
+vocabulaire financier utilisent des JETONS. Les API restent celles de
+https://api.njambo.fr.
+
+Historique des commits de migration
+------------------------------------
+- 1b22349 : création initiale du dépôt mobile-free à partir de l’application
+  mobile principale.
+- ec2d3f4 : remplacement des références de production par game.njambo.fr
+  dans l’index et la configuration de déploiement.
+- 9807ad6 : recherche automatique limitée à 10 secondes avant création d’une
+  nouvelle partie.
+
+Composants fonctionnels adaptés
+-------------------------------
+
+1. Identité et configuration de l’application
+   - src/index.html : canonical, Open Graph et Twitter pointent vers
+     https://game.njambo.fr/.
+   - src/environments/environment.prod.ts : production utilise
+     https://api.njambo.fr.
+   - src/manifest.webmanifest, src/assets/images et resources : identité,
+     logos, icône JETON et ressources de la version game.
+   - capacitor.config.ts, config.xml et ios/ : nom/identité de l’application
+     mobile-free à conserver lors d’une génération native.
+
+2. Solde, transactions et paiements
+   - src/app/transactions/ : remplacer CFA par JETONS dans le solde, les
+     mouvements et les messages.
+   - Conserver l’ajout/achat de JETONS.
+   - Ne pas afficher un retrait automatique : utiliser « Demander un
+     remboursement », avec traitement manuel, validation ou rejet côté équipe.
+   - src/app/core/account-api.service.ts : conserver les mêmes API backend et
+     vérifier les libellés/types retournés par l’API.
+
+3. Parties et mises
+   - src/app/new-table/ : participation, minimum et maximum affichés en
+     JETONS.
+   - src/app/shared/game-stake-info/ : participation et récompense en JETONS.
+   - src/app/shared/game-table-tools/ : messages d’abandon et perte de mise
+     adaptés au vocabulaire JETONS.
+   - src/app/game-replay/ : mise affichée en JETONS.
+   - src/app/home/, src/app/player-profile/ et composants de recherche :
+     soldes et mises affichés en JETONS.
+
+4. Jeux
+   - src/app/game-board/ : écran FapFap conservé, libellés financiers adaptés.
+   - src/app/check-game-board/ et src/app/tcheck-game-board/ : participation,
+     récompense et soldes en JETONS.
+   - src/app/cochon-game-board/ : conserver les mêmes règles et API ; vérifier
+     les messages de mise et de récompense.
+   - src/app/garame-game-board/ : participation, récompense et égalité en
+     JETONS.
+   - src/app/tchia-direct-game-board/ : mise, pot et notification d’égalité
+     en JETONS.
+   - src/app/uno-game-board/ : conserver le fonctionnement et vérifier les
+     éventuels libellés financiers.
+
+5. Récompenses et progression
+   - src/app/challenges/ : récompenses affichées en JETONS.
+   - src/app/championships/ : droits d’entrée, gains, remboursements et
+     soldes des participants en JETONS.
+   - src/app/leaderboard/ et src/app/guilds/ : récompenses en JETONS.
+   - src/app/subscriptions/ : abonnements valorisés en JETONS.
+   - src/app/referral/ et src/app/profile/ : bonus et coûts d’avatar en
+     JETONS.
+
+6. Recherche rapide de partie
+   - src/app/shared/quick-match-modal/quick-match-modal.component.ts :
+     searchTimeoutMs = 10 * 1000.
+   - src/app/shared/quick-match-modal/quick-match-modal.component.html : le
+     texte indique 10 secondes et utilise JETONS maximum.
+   - Le polling reste à 4 secondes. Après 10 secondes sans table compatible,
+     quickCreate est appelé automatiquement.
+
+Règles de conversion à appliquer lors d’une nouvelle migration
+----------------------------------------------------------------
+- CFA -> JETONS dans tous les textes, titres, boutons, alertes et écrans.
+- Ne pas renommer les propriétés API si le backend conserve stakeAmount,
+  balance, pot ou les types de transaction : modifier uniquement l’affichage.
+- Remplacer « retrait » par « remboursement » dans l’interface utilisateur.
+- Les demandes de remboursement restent manuelles ; ne pas ajouter de
+  conversion automatique en argent dans l’application game.
+- Conserver les mêmes endpoints, authentification, WebSocket, règles de jeu,
+  ELO, campagnes et championnats, sauf décision produit explicite.
+- Vérifier qu’aucune URL de production ne pointe vers cartes.njambo.fr : la
+  version game doit utiliser game.njambo.fr et l’API api.njambo.fr.
+
+Déploiement
+-----------
+- Dépôt : https://github.com/feav/njambo-mobile-free.git
+- Branche production : main.
+- Le workflow .github/workflows/ci-cd.yml construit la version production et
+  déploie dans /var/www/njambo/game.
+- Commandes de vérification :
+    npm ci
+    npm run build:production
+    node scripts/verify-api-target.mjs production
+    git push origin main
+
+Validation effectuée pour la dernière modification
+---------------------------------------------------
+- Build Angular production réussi.
+- Commit publié : 9807ad6.
+- Le workflow GitHub Actions de production a été lancé pour game.njambo.fr.
