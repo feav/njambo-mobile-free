@@ -15,8 +15,8 @@ export class PlayerProfileModalComponent{
  get winRate(){return this.total?Math.round(this.profile.wins*1000/this.total)/10:0}
  get lossRate(){return this.total?Math.round(this.profile.losses*1000/this.total)/10:0}
  get rankLabel(){const r=this.profile?.rating||0;return r>=2800?'Diamant':r>=2400?'Or III':r>=2000?'Argent': 'Bronze'}
- get isEducationalBot(){return this.profile?.userType==='AUTOMATIC'}
- get canAdd(){return !this.isEducationalBot&&(this.profile?.friendshipStatus==='NONE'||this.profile?.friendshipStatus==='DECLINED')}
+ get isAutomaticBot(){return this.profile?.userType==='AUTOMATIC'}
+ get canAdd(){return !this.isAutomaticBot&&(this.profile?.friendshipStatus==='NONE'||this.profile?.friendshipStatus==='DECLINED')}
  get campaignBadges(){const groups=new Map<string,PlayerCampaignBadge[]>();for(const badge of this.profile?.badges||[])groups.set(badge.gameType,[...(groups.get(badge.gameType)||[]),badge]);return [...groups.entries()].map(([gameType,badges])=>{const ordered=[...badges].sort((a,b)=>b.level-a.level);return {gameType,name:this.gameName(gameType),badge:ordered[0],completed:badges.length,stars:badges.reduce((sum,badge)=>sum+(badge.stars||0),0)}})}
  get badgeStars(){return(this.profile?.badges||[]).reduce((sum,badge)=>sum+(badge.stars||0),0)}
  flag(code?:string){return(code||'').toUpperCase().replace(/./g,c=>String.fromCodePoint(127397+c.charCodeAt(0)))}
