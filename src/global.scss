@@ -664,9 +664,78 @@ ion-alert.game-chat-alert {
 }
 
 ion-alert.game-result-winner .alert-message { aspect-ratio:800/560;background-image:url('/assets/images/popup/win.webp'); }
+ion-alert.game-result-winner.has-gross-pot .alert-message {
+    aspect-ratio:800/690;
+    background-size:100% auto;
+    background-position:top center;
+}
+ion-alert.game-result-winner.has-gross-pot .gross-pot-win {
+    position:absolute;
+    inset:auto 4% 1.5%;
+    min-height:17%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:1px;
+    overflow:hidden;
+    border:1px solid rgba(255,221,115,.76);
+    border-radius:14px;
+    background:radial-gradient(ellipse at 50% 0,rgba(255,218,91,.32),transparent 68%),linear-gradient(180deg,rgba(27,18,3,.94),rgba(3,8,5,.98));
+    box-shadow:0 0 18px rgba(255,197,54,.32),inset 0 1px 0 rgba(255,244,190,.28),inset 0 -8px 18px rgba(255,171,20,.08);
+    animation:gross-pot-panel-in .5s cubic-bezier(.2,.8,.2,1) both;
+}
+ion-alert.game-result-winner.has-gross-pot .gross-pot-win::before {
+    position:absolute;
+    inset:0 auto 0 -45%;
+    width:32%;
+    content:'';
+    transform:skewX(-20deg);
+    background:linear-gradient(90deg,transparent,rgba(255,245,187,.24),transparent);
+    animation:gross-pot-shine 2.6s ease-in-out .5s infinite;
+}
+ion-alert.game-result-winner.has-gross-pot .gross-pot-label,
+ion-alert.game-result-winner.has-gross-pot .gross-pot-currency {
+    position:relative;
+    z-index:1;
+    color:#ffe7a0;
+    font-weight:900;
+    letter-spacing:.16em;
+    line-height:1.1;
+    text-shadow:0 1px 7px rgba(0,0,0,.9);
+}
+ion-alert.game-result-winner.has-gross-pot .gross-pot-label { font-size:clamp(8px,2.15vw,11px); }
+ion-alert.game-result-winner.has-gross-pot .gross-pot-currency { font-size:clamp(7px,1.9vw,9px);color:rgba(255,239,193,.78); }
+ion-alert.game-result-winner.has-gross-pot .gross-pot-amount {
+    position:relative;
+    z-index:1;
+    display:block;
+    max-width:100%;
+    color:#ffd760;
+    background:linear-gradient(180deg,#fff9cc 0%,#ffe675 23%,#ffbd25 57%,#fff1a8 76%,#d78b08 100%);
+    background-clip:text;
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    font-size:clamp(20px,6.2vw,34px);
+    font-weight:1000;
+    font-variant-numeric:tabular-nums;
+    letter-spacing:.025em;
+    line-height:1.05;
+    filter:drop-shadow(0 2px 0 #5f3905) drop-shadow(0 0 10px rgba(255,197,47,.7));
+    animation:gross-pot-number-glow 1.7s ease-in-out infinite alternate;
+}
+@keyframes gross-pot-panel-in { from { opacity:0;transform:translateY(10px) scale(.96); } to { opacity:1;transform:translateY(0) scale(1); } }
+@keyframes gross-pot-shine { 0%,18% { left:-45%; } 58%,100% { left:125%; } }
+@keyframes gross-pot-number-glow { from { filter:drop-shadow(0 2px 0 #5f3905) drop-shadow(0 0 6px rgba(255,197,47,.45)); } to { filter:drop-shadow(0 2px 0 #5f3905) drop-shadow(0 0 15px rgba(255,214,83,.9)); } }
 ion-alert.game-result-loser .alert-message { aspect-ratio:800/563;background-image:url('/assets/images/popup/loose.webp'); }
 ion-alert.game-result-cancelled .alert-message { height:auto!important;min-height:0;aspect-ratio:auto;padding:28px 22px 8px;color:rgba(255,255,255,.78);background-image:none; }
 ion-alert.game-result-spectator .alert-message { height:auto!important;min-height:0;aspect-ratio:auto;padding:28px 22px 8px;color:rgba(255,255,255,.88);background-image:none;text-align:center;line-height:1.7; }
+
+@media (prefers-reduced-motion:reduce) {
+    ion-alert.game-result-winner.has-gross-pot .gross-pot-win,
+    ion-alert.game-result-winner.has-gross-pot .gross-pot-win::before,
+    ion-alert.game-result-winner.has-gross-pot .gross-pot-amount { animation:none!important; }
+}
 
 ion-alert.game-result-winner { z-index:20002!important; }
 

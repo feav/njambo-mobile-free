@@ -16,6 +16,7 @@ import {CampaignFlowService} from '../core/campaign-flow.service';
 import {InsufficientFundsAlertService} from '../core/insufficient-funds-alert.service';
 import {SpectatorResultService} from '../core/spectator-result.service';
 import {GameShareService} from '../core/game-share.service';
+import { animateGrossPot, grossPotAmount, grossPotMessage } from '../core/gross-pot-win.util';
 
 interface BoardPlayer {
     id: string;
@@ -1190,12 +1191,16 @@ export class GameBoardPage implements OnInit, OnDestroy {
             return;
         }
         let alert: any;
+        const moneyState = !cancelled && !championship && won
+            ? await firstValueFrom(this.gameApi.state(state.gameId)).catch(() => state)
+            : null;
+        const grossPot = moneyState ? grossPotAmount(moneyState) : null;
         alert = await this.alertController.create({
             cssClass: cancelled ? 'fafap-game-alert game-result-alert game-result-cancelled'
                 : championship ? `fafap-game-alert championship-result-alert ${won ? 'manche-won' : 'manche-lost'}`
-                : `fafap-game-alert game-result-alert ${won ? 'game-result-winner' : 'game-result-loser'}`,
+                : `fafap-game-alert game-result-alert ${won ? 'game-result-winner' : 'game-result-loser'}${grossPot ? ' has-gross-pot' : ''}`,
             header: cancelled ? 'Partie annulée' : championship ? (won ? 'Duel remporté !' : 'Duel perdu') : undefined,
-            message: cancelled ? 'Cette partie a été annulée.' : championship ? this.championshipFlow.finalMessage(championship, won) : '\u00a0',
+            message: cancelled ? 'Cette partie a été annulée.' : championship ? this.championshipFlow.finalMessage(championship, won) : grossPot ? grossPotMessage(grossPot) : '\u00a0',
             backdropDismiss: true,
             buttons: [
                 ...(!cancelled && !championship && state.rematchGameId ? [{
@@ -1218,6 +1223,7 @@ export class GameBoardPage implements OnInit, OnDestroy {
             ]
         });
         await alert.present();
+        if (grossPot) animateGrossPot(alert);
         if (won && !cancelled) {
             this.startVictoryCelebration();
             void alert.onDidDismiss().then(() => this.stopVictoryCelebration());
