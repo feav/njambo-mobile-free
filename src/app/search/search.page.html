@@ -55,7 +55,7 @@
                 <div class="table-left">
                     <div class="table-badge" [ngClass]="table.gameClass"><img [src]="table.icon" [alt]="table.gameName"><span>{{table.gameName}}</span></div>
                     <div class="table-copy">
-                        <div class="table-tag" [class.human-urgent-tag]="table.isUrgent"><i class="fas" [ngClass]="table.isUrgent ? 'fa-bolt' : 'fa-crown'"></i>{{ table.isUrgent ? 'Joueurs humains · à rejoindre' : table.label }}</div>
+                        <div class="table-tag"><i class="fas fa-crown"></i>{{ table.label }}</div>
                         <h2>{{ table.title }}</h2>
                         <p>No. {{ table.code }} <ng-container *ngIf="activeTab !== 'terminees'"><span>•</span> Blindes {{ table.blinds }}</ng-container></p>
                         <div class="players">
