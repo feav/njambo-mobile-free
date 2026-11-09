@@ -97,7 +97,7 @@ export interface GamePlayerPublicDto {
     gamePlayerId: string; userId: string; username: string; userType: 'HUMAN' | 'AUTOMATIC'; seatNumber: number;
     avatarUrl: string;
     countryCode?: string;
-    active: boolean; commander: boolean; connected: boolean; disconnectedAt: string | null; remainingCardCount: number; status: string; automaticMode:boolean;
+    active: boolean; commander: boolean; connected: boolean; disconnectedAt: string | null; remainingCardCount: number; status: string; automaticMode:boolean; joinedAt?: string;
 }
 
 export interface GameStateDto {

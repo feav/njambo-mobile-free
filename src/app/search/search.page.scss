@@ -113,9 +113,15 @@ ion-content {
     .metrics img { width:19px; height:19px; }
     .join-button { width:100%; min-height:48px; border:1px solid #79ff32; border-radius:14px; background:radial-gradient(circle at 50% 0,rgba(137,255,74,.48),transparent 58%),linear-gradient(180deg,#369f22,#0d5a14); box-shadow:inset 0 1px 0 rgba(220,255,198,.35),0 0 14px rgba(121,255,50,.3); color:#fff; font-size:.76rem; font-weight:900; letter-spacing:.1em; text-transform:uppercase; }
     .join-button.disabled { border-color:rgba(255,255,255,.12); background:rgba(255,255,255,.055); box-shadow:none; color:rgba(255,255,255,.42); cursor:not-allowed; }
+    .table-card.human-urgent-card { border-color:rgba(255,190,62,.85); box-shadow:inset 0 1px 0 rgba(255,230,165,.08),0 0 22px rgba(255,168,35,.23),0 14px 30px rgba(0,0,0,.24); animation:human-table-pulse 2s ease-in-out infinite; }
+    .table-card.human-urgent-card .table-tag.human-urgent-tag { border-color:rgba(255,194,72,.85); background:linear-gradient(100deg,rgba(173,94,11,.34),rgba(75,43,8,.24)); color:#ffd36a; }
+    .table-card.human-urgent-card .table-tag.human-urgent-tag i { color:#ffb938; }
+    .table-card .join-button.human-urgent-join { border-color:#ffd05a; background:radial-gradient(circle at 50% 0,rgba(255,235,157,.5),transparent 58%),linear-gradient(180deg,#e7a62c,#a7530c); box-shadow:inset 0 1px 0 rgba(255,246,202,.45),0 0 18px rgba(255,174,47,.48); animation:human-join-pulse 1.3s ease-in-out infinite; }
 }
 
 @keyframes refresh-spin { to { transform:rotate(360deg); } }
+@keyframes human-table-pulse { 50% { border-color:rgba(255,215,112,.55);box-shadow:inset 0 1px 0 rgba(255,230,165,.04),0 0 12px rgba(255,168,35,.12),0 14px 30px rgba(0,0,0,.24); } }
+@keyframes human-join-pulse { 50% { filter:brightness(1.16);box-shadow:inset 0 1px 0 rgba(255,246,202,.5),0 0 24px rgba(255,174,47,.7); } }
 
 @media (max-width:720px) {
     ion-header { .header-profile span { display:none; } .header-profile > img { width:58px; height:58px; } h1 { font-size:.82rem; } .header-wallet { min-width:0; padding:8px 10px; grid-template-columns:auto 38px; column-gap:8px; } .header-wallet strong { font-size:.82rem; } .header-wallet button { width:38px; height:38px; border-radius:12px; } }

@@ -25,6 +25,6 @@ export class PlayerProfileModalComponent{
  addFriend(){if(!this.canAdd||this.busy)return;this.busy=true;this.social.request(this.profile.username).subscribe({next:async()=>{this.busy=false;await this.notice('Demande d’ami envoyée');await this.modal.dismiss({friendRequested:true})},error:async e=>{this.busy=false;await this.notice(e?.error?.message||'Impossible d’ajouter ce joueur.')}})}
  private async notice(message:string){const t=await this.toast.create({message,duration:2400,position:'top',color:'danger'});await t.present()}
  badgeUrl(levelId:string){return this.campaigns.badgeUrl(levelId)}
- gameName(type:string){return type==='FAFAP'?'FapFap':type==='UNO'?'UNO':type==='CHECK_GAMES'?'Tcheck Game':'Cochon Gratté'}
+ gameName(type:string){return type==='FAFAP'?'FapFap':type==='PRESIDENT'?'Président':type==='UNO'?'UNO':type==='CHECK_GAMES'?'Tcheck Game':type==='COCHON_GRATTE'?'Cochon Gratté':type==='TCHIA_DIRECT'?'Tchia Direct':type==='TCHIA_IMPOT'?'Tchia Impôt':'Tchia Garame'}
  guildImage(path?:string){return path?.startsWith('http')?path:`${environment.apiBaseUrl}${path||''}`}
 }

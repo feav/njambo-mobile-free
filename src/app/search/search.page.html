@@ -51,11 +51,11 @@
                 actionLabel="Actualiser"
                 (action)="loadGames()">
             </app-empty-state>
-            <article class="table-card" *ngFor="let table of visibleTables; trackBy: trackTable">
+            <article class="table-card" *ngFor="let table of visibleTables; trackBy: trackTable" [class.human-urgent-card]="table.isUrgent">
                 <div class="table-left">
                     <div class="table-badge" [ngClass]="table.gameClass"><img [src]="table.icon" [alt]="table.gameName"><span>{{table.gameName}}</span></div>
                     <div class="table-copy">
-                        <div class="table-tag"><i class="fas fa-crown"></i>{{ table.label }}</div>
+                        <div class="table-tag" [class.human-urgent-tag]="table.isUrgent"><i class="fas" [ngClass]="table.isUrgent ? 'fa-bolt' : 'fa-crown'"></i>{{ table.isUrgent ? 'Joueurs humains · à rejoindre' : table.label }}</div>
                         <h2>{{ table.title }}</h2>
                         <p>No. {{ table.code }} <ng-container *ngIf="activeTab !== 'terminees'"><span>•</span> Blindes {{ table.blinds }}</ng-container></p>
                         <div class="players">
@@ -71,7 +71,7 @@
                         <div *ngIf="activeTab !== 'terminees'"><span>Pot actuel</span><strong>{{ table.pot }}</strong></div>
                         <div><span>Temps restant</span><strong><ion-icon name="time-outline"></ion-icon>{{ table.time }}</strong></div>
                     </div>
-                    <button type="button" class="join-button" [class.disabled]="table.actionDisabled" [disabled]="table.actionDisabled" (click)="joinTable(table)">{{ table.action }}</button>
+                    <button type="button" class="join-button" [class.human-urgent-join]="table.isUrgent && !table.actionDisabled" [class.disabled]="table.actionDisabled" [disabled]="table.actionDisabled" (click)="joinTable(table)">{{ table.action }}</button>
                 </div>
             </article>
             <ion-infinite-scroll [disabled]="!hasMoreTables || loading || loadingMore" threshold="120px" (ionInfinite)="loadMoreTables($event)">

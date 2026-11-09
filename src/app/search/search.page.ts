@@ -82,6 +82,8 @@ export class SearchPage implements OnInit, OnDestroy {
       .filter(game => this.selectedPlayerCount === null || game.requiredPlayerCount === this.selectedPlayerCount)
       .filter(game => this.selectedAccessType === null || game.accessType === this.selectedAccessType)
       .sort((left, right) => {
+        const urgencyPriority = Number(this.isUrgentHumanGame(right)) - Number(this.isUrgentHumanGame(left));
+        if (urgencyPriority !== 0) return urgencyPriority;
         const creatorPriority = Number(this.isHumanCreated(right)) - Number(this.isHumanCreated(left));
         if (creatorPriority !== 0) return creatorPriority;
         return Number(this.isParticipant(right)) - Number(this.isParticipant(left));
@@ -291,13 +293,18 @@ export class SearchPage implements OnInit, OnDestroy {
   private isHumanCreated(game: GameSummaryDto) {
     return game.players.find(player => player.seatNumber === 1)?.userType === 'HUMAN';
   }
+  private isUrgentHumanGame(game: GameSummaryDto) {
+    if (this.isHumanCreated(game)) return true;
+    const cutoff = Date.now() - 3 * 60_000;
+    return game.players.some(player => player.userType === 'HUMAN' && player.joinedAt && Date.parse(player.joinedAt) >= cutoff);
+  }
   private toTable(game: GameSummaryDto) {
     const open = game.status === 'WAITING_FOR_PLAYERS' && game.availableSeats > 0;
     const queueOpen = game.status === 'WAITING_FOR_PLAYERS' && game.availableSeats === 0 && game.waitlistAvailable > 0;
     const isParticipant = this.isParticipant(game);
     const gameType = game.gameType || 'FAFAP';
     return {
-      game, isParticipant, title: `Partie ${game.gameId.slice(0, 6)}`, code: game.gameId.slice(0, 8).toUpperCase(), blinds: game.stakeAmount.toLocaleString('fr-FR'),
+      game, isParticipant, isUrgent: this.isUrgentHumanGame(game), title: `Partie ${game.gameId.slice(0, 6)}`, code: game.gameId.slice(0, 8).toUpperCase(), blinds: game.stakeAmount.toLocaleString('fr-FR'),
       pot: (game.stakeAmount * game.playerCount).toLocaleString('fr-FR'), time: game.status === 'WAITING_FOR_PLAYERS' ? 'En attente' : `Version ${game.version}`,
       players: game.players.filter(player => player.status !== 'WAITLISTED').slice(0, 3).map(player => player.avatarUrl),
       extraPlayers: Math.max(0, game.playerCount - 3), icon: this.gameIcon(gameType), gameName: this.gameName(gameType), gameClass: gameType.toLowerCase(),

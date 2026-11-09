@@ -5,11 +5,12 @@ import{SocialApiService,FriendGameRow,PlayerProfileView}from'../core/social-api.
 import{GameBoardNavigationService}from'../core/game-board-navigation.service';
 import{GameApiService,GameType}from'../core/game-realtime/game-api.service';
 import{RankedLocationService}from'../core/ranked-location.service';
+import{CampaignApiService,PlayerCampaignBadge}from'../core/campaign-api.service';
 
 @Component({standalone:false,selector:'app-player-profile',templateUrl:'./player-profile.page.html',styleUrls:['./player-profile.page.scss']})
 export class PlayerProfilePage implements OnInit{
   userId='';username='Joueur';avatarUrl='';games:FriendGameRow[]=[];profile?:PlayerProfileView;loading=true;
-  constructor(private route:ActivatedRoute,private social:SocialApiService,private navigation:GameBoardNavigationService,private gamesApi:GameApiService,private alerts:AlertController,private rankedLocation:RankedLocationService){}
+  constructor(private route:ActivatedRoute,private social:SocialApiService,private navigation:GameBoardNavigationService,private gamesApi:GameApiService,private alerts:AlertController,private rankedLocation:RankedLocationService,private campaigns:CampaignApiService){}
   ngOnInit(){this.userId=this.route.snapshot.queryParamMap.get('userId')||'';this.username=this.route.snapshot.queryParamMap.get('username')||this.username;this.avatarUrl=this.route.snapshot.queryParamMap.get('avatarUrl')||'';this.reload();}
   ionViewWillEnter(){this.reload();}
   reload(){if(!this.userId)return;this.loading=true;this.social.profile(this.userId).subscribe({next:p=>{this.profile=p;this.username=p.username;this.avatarUrl=p.avatarUrl},error:()=>undefined});this.social.friendGames(this.userId).subscribe({next:v=>{this.games=v;this.loading=false},error:()=>this.loading=false});}
@@ -19,7 +20,10 @@ export class PlayerProfilePage implements OnInit{
   canJoin(game:FriendGameRow){return game.status==='WAITING_FOR_PLAYERS'}
   canSpectate(game:FriendGameRow){return['STARTING','IN_PROGRESS','SETTLING'].includes(game.status)}
   trackGame(_index:number,game:FriendGameRow){return game.gameId;}
-  gameName(type:GameType){return type==='FAFAP'?'FAFAP':type==='PRESIDENT'?'Président (Trou du cul)':type==='UNO'?'UNO':type==='CHECK_GAMES'?'Tcheck Game':'Cochon Gratté';}
+  gameName(type:GameType){return type==='FAFAP'?'FapFap':type==='PRESIDENT'?'Président':type==='UNO'?'UNO':type==='CHECK_GAMES'?'Tcheck Game':type==='COCHON_GRATTE'?'Cochon Gratté':type==='TCHIA_DIRECT'?'Tchia Direct':type==='TCHIA_IMPOT'?'Tchia Impôt':'Tchia Garame';}
+  get campaignBadges(){const groups=new Map<string,PlayerCampaignBadge[]>();for(const badge of this.profile?.badges||[])groups.set(badge.gameType,[...(groups.get(badge.gameType)||[]),badge]);return [...groups.entries()].map(([gameType,badges])=>{const ordered=[...badges].sort((a,b)=>b.level-a.level);return{gameType,name:this.gameName(gameType as GameType),badge:ordered[0],completed:badges.length,stars:badges.reduce((sum,badge)=>sum+(badge.stars||0),0)}})}
+  get badgeStars(){return(this.profile?.badges||[]).reduce((sum,badge)=>sum+(badge.stars||0),0)}
+  badgeUrl(levelId:string){return this.campaigns.badgeUrl(levelId)}
   winRate(){const p=this.profile;return p&&p.gamesPlayed?Math.round(p.wins/p.gamesPlayed*1000)/10:0;}
   memberSince(){return this.profile?.registeredAt;}
   statusLabel(status:string){return status==='IN_PROGRESS'?'En cours':status==='SETTLING'?'Se termine…':status==='WAITING_FOR_PLAYERS'?'En attente de joueurs':'Sur le point de commencer';}
