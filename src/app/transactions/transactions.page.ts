@@ -31,7 +31,7 @@ export class TransactionsPage implements OnInit {
     paymentRequests: PaymentRequestView[] = [];
     paymentOptions: PaymentOptions|null = null;
     readonly supportMessengerLink = 'https://m.me/1265920616601740';
-    readonly supportWhatsappLink = 'https://wa.me/33646922921';
+    readonly supportWhatsappLink = 'https://wa.me/33758470801';
 
     transactionGroups: Array<{label:string;positive:string;negative:string;items:Array<{type:TransactionFilter;title:string;reference:string;time:string;amount:string}>}> = [];
 

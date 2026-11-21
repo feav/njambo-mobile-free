@@ -80,6 +80,7 @@ export class AppComponent {
             { title: 'Transactions', route: '/transactions', icon: 'fas fa-coins' },
             { title: 'Tables Live', route: '/search', icon: 'fas fa-signal' },
             { title: 'Championnats', route: '/championships', icon: 'fas fa-crown' },
+            { title: 'Arène Royale', route: '/arenas', icon: 'fas fa-chess-rook' },
             { title: 'Défis & primes', route: '/challenges', icon: 'fas fa-medal' },
             { title: 'Campagne', route: '/campaign', icon: 'fas fa-map' },
             { title: 'Classement ELO', route: '/leaderboard', icon: 'fas fa-trophy' },

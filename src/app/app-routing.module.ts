@@ -31,6 +31,7 @@ const routes: Routes = [
     {path:'referral',canActivate:[authRequiredGuard],loadChildren:()=>import('./referral/referral.module').then(m=>m.ReferralPageModule)},
     {path:'subscriptions',canActivate:[authRequiredGuard],loadChildren:()=>import('./subscriptions/subscriptions.module').then(m=>m.SubscriptionsPageModule)},
     {path:'championships',canActivate:[authRequiredGuard],loadChildren:()=>import('./championships/championships.module').then(m=>m.ChampionshipsPageModule)},
+    {path:'arenas',canActivate:[authRequiredGuard],loadChildren:()=>import('./arenas/royal-arenas.module').then(m=>m.RoyalArenasPageModule)},
     {path:'challenges',canActivate:[authRequiredGuard],loadChildren:()=>import('./challenges/challenges.module').then(m=>m.ChallengesPageModule)},
     {path:'campaign',canActivate:[authRequiredGuard],loadChildren:()=>import('./campaign/campaign.module').then(m=>m.CampaignPageModule)},
     {path:'players',loadChildren:()=>import('./player-profile/player-profile.module').then(m=>m.PlayerProfilePageModule)},

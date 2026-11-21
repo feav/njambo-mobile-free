@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AlertController, ToastController } from '@ionic/angular';
 import { ContactRequestService } from './contact-request.service';
+import { AuthService } from '../core/auth.service';
 
 @Component({
     standalone: false,
@@ -13,17 +14,20 @@ export class HelpPage implements OnInit {
     contactForm: FormGroup;
     isSubmitting = false;
     expandedFaq: number | null = 0;
+    username = 'Joueur';
 
     constructor(
         private formBuilder: FormBuilder,
         private contactRequestService: ContactRequestService,
         private toastController: ToastController,
-        private alertController: AlertController
+        private alertController: AlertController,
+        private auth: AuthService
     ) {
         this.contactForm = this.buildForm();
     }
 
     ngOnInit() {
+        this.username = this.auth.currentUser()?.username || 'Joueur';
         this.prefillContactForm();
     }
 

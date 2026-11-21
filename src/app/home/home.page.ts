@@ -45,6 +45,7 @@ export class HomePage implements OnInit {
     quickActions = [
         { label: 'Défis & primes', subtitle: 'Relève les défis', cta: 'Gagner', image: '../../assets/images/home/quick-actions/defis.png', route: '/challenges', tone: 'gold' },
         { label: 'Championnats', subtitle: 'Compétitions en cours', cta: 'Reprendre', image: '../../assets/images/home/quick-actions/tournois.png', route: '/championships', tone: 'gold' },
+        { label: 'Arène Royale', subtitle: 'Réserve et duels en continu', cta: 'Entrer', image: '../../assets/images/home/quick-actions/tournois.png', route: '/arenas', tone: 'gold' },
         { label: 'Campagne', subtitle: 'Continue ton parcours', cta: 'Continuer', image: '../../assets/images/home/quick-actions/missions.png', route: '/campaign', tone: 'purple' },
         { label: 'Classement', subtitle: 'Découvre ta position', cta: 'Voir', image: '../../assets/images/home/quick-actions/classement.png', route: '/leaderboard', tone: 'cyan' },
     ];

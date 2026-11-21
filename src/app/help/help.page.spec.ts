@@ -6,6 +6,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
 import { HelpPage } from './help.page';
+import { AuthService } from '../core/auth.service';
 
 describe('HelpPage', () => {
   let component: HelpPage;
@@ -15,6 +16,7 @@ describe('HelpPage', () => {
     TestBed.configureTestingModule({
       declarations: [ HelpPage ],
       imports: [IonicModule.forRoot(), ReactiveFormsModule, FormsModule, RouterModule.forRoot([])],
+      providers: [{ provide: AuthService, useValue: { currentUser: () => null } }],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]
     }).compileComponents();
 

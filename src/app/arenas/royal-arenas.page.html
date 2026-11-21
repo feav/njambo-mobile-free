@@ -1,0 +1,77 @@
+<app-page-header title="Arène Royale" [showAdd]="false"></app-page-header>
+<ion-content class="arena-content">
+  <main class="arena-shell">
+    <section class="royal-hero" *ngIf="!detail">
+      <div class="hero-emblem"><ion-icon name="shield-half"></ion-icon><span>♛</span></div>
+      <div class="hero-copy"><span class="eyebrow">NJAMBO · COMPÉTITION CONTINUE</span><h1>L’Arène Royale</h1><p>Protège ta réserve, enchaîne les duels et prends la tête du classement.</p></div>
+      <button class="gold-button" (click)="creating=!creating"><ion-icon [name]="creating?'close':'add'"></ion-icon>{{creating?'Fermer':'Créer une arène'}}</button>
+    </section>
+
+    <section class="create-panel" *ngIf="creating&&!detail">
+      <header><span class="eyebrow">NOUVEL ÉVÉNEMENT</span><h2>Configure ton arène</h2><p>La mise de chaque duel doit rester inférieure au droit d’entrée.</p></header>
+      <label class="field"><span>Nom de l’arène</span><ion-input [(ngModel)]="form.name" maxlength="120"></ion-input></label>
+      <div class="field"><span>Jeu disputé · une manche par duel</span><ion-select [(ngModel)]="form.gameType" interface="popover"><ion-select-option value="FAFAP">FapFap</ion-select-option><ion-select-option value="UNO">UNO</ion-select-option><ion-select-option value="PRESIDENT">Président</ion-select-option><ion-select-option value="COCHON_GRATTE">Cochon Gratté</ion-select-option><ion-select-option value="CHECK_GAMES">Tcheck Game</ion-select-option><ion-select-option value="TCHIA_DIRECT">21 Direct</ion-select-option><ion-select-option value="TCHIA_IMPOT">21 Impôt</ion-select-option><ion-select-option value="TCHIA_GARAME">21 Garamé</ion-select-option></ion-select></div>
+      <div class="form-grid">
+        <label class="field"><span>Droit d’entrée · réserve initiale Y</span><div class="money-input"><ion-input type="number" min="1" step="1" [(ngModel)]="form.entryFee"></ion-input><b>FCFA</b></div></label>
+        <label class="field"><span>Mise de chaque duel X</span><div class="money-input"><ion-input type="number" min="1" step="1" [(ngModel)]="form.matchStake"></ion-input><b>FCFA</b></div></label>
+        <label class="field"><span>Début des inscriptions</span><input type="datetime-local" [(ngModel)]="form.startsAt"></label>
+        <label class="field"><span>Durée de l’arène</span><div class="money-input"><ion-input type="number" min="10" max="10080" [(ngModel)]="form.durationMinutes"></ion-input><b>minutes</b></div></label>
+        <label class="field"><span>Nombre maximum de joueurs</span><div class="money-input"><ion-input type="number" min="2" placeholder="Sans limite" [(ngModel)]="form.maxParticipants"></ion-input><b>optionnel</b></div></label>
+      </div>
+      <div class="form-note"><ion-icon name="information-circle-outline"></ion-icon><span>Les commissions appliquent le taux des parties configuré sur Njambo. La création ne verrouille pas de mise : Y est prélevé à l’inscription.</span></div>
+      <button class="gold-button submit" [disabled]="busy||form.matchStake>=form.entryFee" (click)="create()">{{busy?'Création…':'Créer l’Arène Royale'}}</button>
+      <small class="validation" *ngIf="form.matchStake>=form.entryFee">La mise X doit être inférieure au droit d’entrée Y.</small>
+    </section>
+
+    <ng-container *ngIf="!detail">
+      <nav class="arena-tabs"><button [class.active]="activeTab==='all'" (click)="activeTab='all'">Inscriptions</button><button [class.active]="activeTab==='current'" (click)="activeTab='current'">En cours</button><button [class.active]="activeTab==='past'" (click)="activeTab='past'">Terminées</button></nav>
+      <section class="empty-state" *ngIf="!loading&&!filtered.length"><ion-icon name="trophy-outline"></ion-icon><h2>Aucune arène ici pour l’instant</h2><p>Crée une Arène Royale ou reviens bientôt découvrir les prochaines compétitions.</p></section>
+      <section class="arena-grid" *ngIf="filtered.length">
+        <article class="arena-card" *ngFor="let arena of filtered" (click)="open(arena.id)">
+          <div class="card-top"><span class="status-pill" [class.live]="arena.status==='IN_PROGRESS'">{{statusName(arena.status)}}</span><span class="crown">♛</span></div>
+          <span class="eyebrow">{{gameName(arena.gameType)}} · UNE MANCHE</span><h2>{{arena.name}}</h2>
+          <div class="prize-grid"><div><small>ENTRÉE · RÉSERVE Y</small><strong>{{arena.entryFee|number:'1.0-0'}} <i>F</i></strong></div><div><small>MISE PAR DUEL X</small><strong>{{arena.matchStake|number:'1.0-0'}} <i>F</i></strong></div></div>
+          <div class="card-meta"><span><ion-icon name="people-outline"></ion-icon>{{arena.participantCount}}{{arena.maxParticipants?' / '+arena.maxParticipants:''}} joueurs</span><span *ngIf="arena.status==='REGISTRATION'"><ion-icon name="time-outline"></ion-icon>Départ {{countdown(arena.startsAt)}}</span><span *ngIf="arena.status==='IN_PROGRESS'"><ion-icon name="hourglass-outline"></ion-icon>Fin {{countdown(arena.endsAt)}}</span></div>
+          <div class="card-footer"><span>{{arena.joined?'Tu es inscrit':'Commission '+arena.feePercentage+' %'}}</span><button>Voir l’arène <ion-icon name="arrow-forward"></ion-icon></button></div>
+        </article>
+      </section>
+    </ng-container>
+
+    <ng-container *ngIf="detail as d">
+      <button class="back-link" (click)="detail=undefined;reload(false)"><ion-icon name="arrow-back"></ion-icon> Toutes les arènes</button>
+      <section class="detail-hero">
+        <div class="hero-emblem"><ion-icon name="shield-half"></ion-icon><span>♛</span></div>
+        <div class="detail-title"><span class="eyebrow">{{gameName(d.arena.gameType)}} · ARÈNE ROYALE</span><h1>{{d.arena.name}}</h1><p>{{statusName(d.arena.status)}} · Départ {{date(d.arena.startsAt)}}</p></div>
+        <div class="detail-actions" *ngIf="d.arena.status==='REGISTRATION'&&!d.arena.joined"><button class="gold-button" [disabled]="busy||isFull(d.arena)" (click)="join()"><span *ngIf="isFull(d.arena)">Arène complète</span><span *ngIf="!isFull(d.arena)">Rejoindre · {{d.arena.entryFee|number:'1.0-0'}} F</span></button></div>
+        <div class="detail-actions" *ngIf="d.arena.canCancel&&d.arena.status==='REGISTRATION'"><button class="subtle-button" [disabled]="busy" (click)="cancel()">Annuler l’arène</button></div>
+        <div class="detail-actions" *ngIf="d.arena.joined&&d.arena.status==='REGISTRATION'"><button class="subtle-button" [disabled]="busy" (click)="leave()">Quitter · récupérer ma réserve</button></div>
+        <div class="detail-actions" *ngIf="myParticipant&&d.arena.status==='IN_PROGRESS'&&(myParticipant.status==='QUEUED'||myParticipant.status==='PLAYING')"><button class="subtle-button danger" [disabled]="busy" (click)="abandon()">Abandonner l’arène</button></div>
+      </section>
+
+      <nav class="detail-tabs"><button [class.active]="detailTab==='mine'" (click)="detailTab='mine'">Ma partie &amp; ma réserve</button><button [class.active]="detailTab==='players'" (click)="detailTab='players'">Joueurs &amp; classement</button></nav>
+      <section class="reserve-strip" *ngIf="detailTab==='mine'"><div><small>TA RÉSERVE</small><strong>{{myParticipant?.reserveBalance|number:'1.0-0'}} <i>F</i></strong></div><div><small>MISE DU DUEL</small><strong>{{d.arena.matchStake|number:'1.0-0'}} <i>F</i></strong></div><div><small>JOUEURS INSCRITS</small><strong>{{d.arena.participantCount}}{{d.arena.maxParticipants?' / '+d.arena.maxParticipants:''}}</strong></div><div><small>FIN DE L’ARÈNE</small><strong>{{date(d.arena.endsAt)}}</strong></div></section>
+
+      <section class="your-match" *ngIf="detailTab==='mine'&&myParticipant&&d.arena.status==='REGISTRATION'"><ion-icon name="hourglass-outline"></ion-icon><div><strong>Ta partie attend le départ</strong><span>Ton solde virtuel est réservé. Les matchs commenceront à l’heure prévue.</span></div><b>{{countdown(d.arena.startsAt)}}</b></section>
+      <section class="your-match" *ngIf="detailTab==='mine'&&myParticipant?.status==='QUEUED'&&d.arena.status==='IN_PROGRESS'&&!myMatch"><ion-icon name="hourglass-outline"></ion-icon><div><strong>Tu es dans la file d’attente</strong><span>Le matchmaking t’associera au prochain joueur disponible. Ta réserve reste visible dans le classement.</span></div><b>En attente</b></section>
+      <section class="your-match" *ngIf="detailTab==='mine'&&myParticipant?.status==='ELIMINATED'"><ion-icon name="shield-outline"></ion-icon><div><strong>Tu es éliminé de l’arène</strong><span>Le solde restant de ta réserve a été reversé sur ton compte.</span></div></section>
+      <section class="your-match" *ngIf="detailTab==='mine'&&myParticipant?.status==='ABANDONED'"><ion-icon name="exit-outline"></ion-icon><div><strong>Tu as quitté l’arène</strong><span>Ta réserve a été répartie entre les joueurs encore en course.</span></div></section>
+      <section class="your-match" *ngIf="detailTab==='mine'&&myParticipant?.status==='PAID_OUT'"><ion-icon name="checkmark-circle-outline"></ion-icon><div><strong>Ta réserve a été reversée</strong><span>Le solde de l’arène a été crédité sur ton compte Njambo.</span></div></section>
+      <section class="your-match" *ngIf="displayedMatch as match"><ion-icon name="game-controller-outline"></ion-icon><div><strong>{{match.status==='RUNNING'?'Ton duel est prêt':'Match en préparation'}}</strong><span *ngIf="!hasReady(match,myParticipant!)">Clique sur « Prêt » pour signaler ta présence. Après le premier clic, l’autre joueur a 60 secondes.</span><span *ngIf="hasReady(match,myParticipant!)">Présence confirmée. Le duel démarre dès que l’adversaire est prêt.</span></div><button class="gold-button" *ngIf="match.gameId" [disabled]="busy" (click)="ready()">{{hasReady(match,myParticipant!)?'Rejoindre le duel':'Prêt'}}</button></section>
+
+      <div class="detail-columns" *ngIf="detailTab==='players'">
+        <section class="leaderboard-panel"><header><div><span class="eyebrow">CLASSEMENT EN DIRECT</span><h2>Les joueurs de l’arène</h2></div><span class="live-indicator"><i></i>Actualisé en direct</span></header>
+          <div class="player-row" *ngFor="let player of d.participants;let i=index" [class.mine]="player.userId===auth.currentUser()?.id" [class.playing]="player.status==='PLAYING'">
+            <b class="rank">{{rank(i)}}</b><img [src]="player.avatarUrl||'/assets/images/avatars/armel.png'" alt=""><div class="player-name"><strong>{{player.username}} <em *ngIf="player.userId===auth.currentUser()?.id">Toi</em></strong><span>{{statusLabel(player)}}</span></div><strong class="reserve-value">{{player.reserveBalance|number:'1.0-0'}} <i>F</i></strong>
+          </div>
+          <div class="empty-players" *ngIf="!d.participants.length">Aucun joueur inscrit pour le moment.</div>
+        </section>
+        <section class="matches-panel"><header><div><span class="eyebrow">DUELS</span><h2>Matchmaking</h2></div><span>{{d.matches.length}} parties</span></header>
+          <article class="match-row" *ngFor="let match of d.matches"><div><strong>{{playerName(match.participantOneId)}}</strong><small>contre</small><strong>{{playerName(match.participantTwoId)}}</strong></div><span class="match-state" [class.live]="match.status==='RUNNING'">{{match.status==='RUNNING'?'En cours':match.status==='FINISHED'?'Terminée':match.status==='CANCELLED'?'Annulée':'En attente'}}</span><button *ngIf="match.gameId&&match.status==='RUNNING'&&isMyMatch(match)" (click)="ready()">Prêt · ouvrir</button></article>
+          <div class="empty-players" *ngIf="!d.matches.length">Les duels apparaîtront ici dès le début de l’arène.</div>
+        </section>
+      </div>
+      <section class="champion-banner" *ngIf="d.arena.status==='FINISHED'"><span>♛</span><div><small>CHAMPION DE L’ARÈNE</small><strong>{{winnerName(d.arena.winnerUserId)}}</strong></div><ion-icon name="trophy"></ion-icon></section>
+    </ng-container>
+  </main>
+</ion-content>
+<app-bottom-nav></app-bottom-nav>

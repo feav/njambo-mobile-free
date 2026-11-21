@@ -17,7 +17,8 @@ export class AccountApiService {
   transactions(){return this.http.get<AccountTransactionView[]>(`${this.url}/transactions`);}
   paymentOptions(){return this.http.get<PaymentOptions>(`${this.url}/payment-options`);}
   paymentRequests(){return this.http.get<PaymentRequestView[]>(`${this.url}/payment-requests`);}
-  depositRequest(body:{amount:number;method:PaymentMethod;payerReference?:string}){return this.http.post<PaymentRequestView>(`${this.url}/deposit-requests`,body,{headers:{'Idempotency-Key':`deposit:${crypto.randomUUID()}`}});}
-  withdrawalRequest(body:{amount:number;method:PaymentMethod;paypalEmail?:string;phoneNumber?:string;bankRib?:string}){return this.http.post<PaymentRequestView>(`${this.url}/withdrawal-requests`,body,{headers:{'Idempotency-Key':`withdrawal:${crypto.randomUUID()}`}});}
+  depositRequest(body:{amount:number;method:PaymentMethod;payerReference?:string}){return this.http.post<PaymentRequestView>(`${this.url}/deposit-requests`,body,{headers:{'Idempotency-Key':this.idempotencyKey('deposit')}});}
+  withdrawalRequest(body:{amount:number;method:PaymentMethod;paypalEmail?:string;phoneNumber?:string;bankRib?:string}){return this.http.post<PaymentRequestView>(`${this.url}/withdrawal-requests`,body,{headers:{'Idempotency-Key':this.idempotencyKey('withdrawal')}});}
   refundRequest(body:{amount:number;method:PaymentMethod;paypalEmail?:string;phoneNumber?:string;bankRib?:string}){return this.withdrawalRequest(body);}
+  private idempotencyKey(prefix:string){const randomUUID=globalThis.crypto?.randomUUID;if(typeof randomUUID==='function')return`${prefix}:${randomUUID.call(globalThis.crypto)}`;const random=globalThis.crypto?.getRandomValues?Array.from(globalThis.crypto.getRandomValues(new Uint8Array(16)),value=>value.toString(16).padStart(2,'0')).join(''):`${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;return`${prefix}:${random}`;}
 }
