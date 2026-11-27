@@ -7,8 +7,9 @@
       <button class="gold-button" (click)="creating=!creating"><ion-icon [name]="creating?'close':'add'"></ion-icon>{{creating?'Fermer':'Créer une arène'}}</button>
     </section>
 
-    <section class="create-panel" *ngIf="creating&&!detail">
-      <header><span class="eyebrow">NOUVEL ÉVÉNEMENT</span><h2>Configure ton arène</h2><p>La mise de chaque duel doit rester inférieure au droit d’entrée.</p></header>
+    <div class="create-modal-backdrop" *ngIf="creating&&!detail" (click)="creating=false">
+    <section class="create-panel" role="dialog" aria-modal="true" aria-labelledby="create-arena-title" (click)="$event.stopPropagation()">
+      <header><span class="eyebrow">NOUVEL ÉVÉNEMENT</span><button class="modal-close" type="button" (click)="creating=false" aria-label="Fermer">×</button><h2 id="create-arena-title">Configure ton arène</h2><p>La mise de chaque duel doit rester inférieure au droit d’entrée.</p></header>
       <label class="field"><span>Nom de l’arène</span><ion-input [(ngModel)]="form.name" maxlength="120"></ion-input></label>
       <div class="field"><span>Jeu disputé · une manche par duel</span><ion-select [(ngModel)]="form.gameType" interface="popover"><ion-select-option value="FAFAP">FapFap</ion-select-option><ion-select-option value="UNO">UNO</ion-select-option><ion-select-option value="PRESIDENT">Président</ion-select-option><ion-select-option value="COCHON_GRATTE">Cochon Gratté</ion-select-option><ion-select-option value="CHECK_GAMES">Tcheck Game</ion-select-option><ion-select-option value="TCHIA_DIRECT">21 Direct</ion-select-option><ion-select-option value="TCHIA_IMPOT">21 Impôt</ion-select-option><ion-select-option value="TCHIA_GARAME">21 Garamé</ion-select-option></ion-select></div>
       <div class="form-grid">
@@ -22,6 +23,7 @@
       <button class="gold-button submit" [disabled]="busy||form.matchStake>=form.entryFee" (click)="create()">{{busy?'Création…':'Créer l’Arène Royale'}}</button>
       <small class="validation" *ngIf="form.matchStake>=form.entryFee">La mise X doit être inférieure au droit d’entrée Y.</small>
     </section>
+    </div>
 
     <ng-container *ngIf="!detail">
       <nav class="arena-tabs"><button [class.active]="activeTab==='all'" (click)="activeTab='all'">Inscriptions</button><button [class.active]="activeTab==='current'" (click)="activeTab='current'">En cours</button><button [class.active]="activeTab==='past'" (click)="activeTab='past'">Terminées</button></nav>
@@ -42,7 +44,7 @@
       <section class="detail-hero">
         <div class="hero-emblem"><ion-icon name="shield-half"></ion-icon><span>♛</span></div>
         <div class="detail-title"><span class="eyebrow">{{gameName(d.arena.gameType)}} · ARÈNE ROYALE</span><h1>{{d.arena.name}}</h1><p>{{statusName(d.arena.status)}} · Départ {{date(d.arena.startsAt)}}</p></div>
-        <div class="detail-actions" *ngIf="d.arena.status==='REGISTRATION'&&!d.arena.joined"><button class="gold-button" [disabled]="busy||isFull(d.arena)" (click)="join()"><span *ngIf="isFull(d.arena)">Arène complète</span><span *ngIf="!isFull(d.arena)">Rejoindre · {{d.arena.entryFee|number:'1.0-0'}} F</span></button></div>
+        <div class="detail-actions join-arena-action" *ngIf="d.arena.status==='REGISTRATION'&&!d.arena.joined"><button class="gold-button" [disabled]="busy||isFull(d.arena)" (click)="join()"><span *ngIf="isFull(d.arena)">Arène complète</span><span *ngIf="!isFull(d.arena)">Jouer dans l’arène · {{d.arena.entryFee|number:'1.0-0'}} F</span></button></div>
         <div class="detail-actions" *ngIf="d.arena.canCancel&&d.arena.status==='REGISTRATION'"><button class="subtle-button" [disabled]="busy" (click)="cancel()">Annuler l’arène</button></div>
         <div class="detail-actions" *ngIf="d.arena.joined&&d.arena.status==='REGISTRATION'"><button class="subtle-button" [disabled]="busy" (click)="leave()">Quitter · récupérer ma réserve</button></div>
         <div class="detail-actions" *ngIf="myParticipant&&d.arena.status==='IN_PROGRESS'&&(myParticipant.status==='QUEUED'||myParticipant.status==='PLAYING')"><button class="subtle-button danger" [disabled]="busy" (click)="abandon()">Abandonner l’arène</button></div>
